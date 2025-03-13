@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Download, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data for assets
+// Mock data for assets with added criticality field
 const mockAssets = [
-  { id: "a1", name: "Web Server", type: "Server", location: "AWS", complianceStatus: "Compliant", lastUpdated: "2023-10-01" },
-  { id: "a2", name: "Customer Database", type: "Database", location: "Azure", complianceStatus: "Non-Compliant", lastUpdated: "2023-09-15" },
-  { id: "a3", name: "Mobile App Backend", type: "Application", location: "GCP", complianceStatus: "Review Needed", lastUpdated: "2023-10-10" },
-  { id: "a4", name: "HR System", type: "Application", location: "On-Premise", complianceStatus: "Compliant", lastUpdated: "2023-08-22" },
-  { id: "a5", name: "Storage Server", type: "Server", location: "AWS", complianceStatus: "Compliant", lastUpdated: "2023-09-30" },
+  { id: "a1", name: "Web Server", type: "Server", location: "AWS", complianceStatus: "Compliant", criticality: "High", lastUpdated: "2023-10-01" },
+  { id: "a2", name: "Customer Database", type: "Database", location: "Azure", complianceStatus: "Non-Compliant", criticality: "Critical", lastUpdated: "2023-09-15" },
+  { id: "a3", name: "Mobile App Backend", type: "Application", location: "GCP", complianceStatus: "Review Needed", criticality: "Medium", lastUpdated: "2023-10-10" },
+  { id: "a4", name: "HR System", type: "Application", location: "On-Premise", complianceStatus: "Compliant", criticality: "High", lastUpdated: "2023-08-22" },
+  { id: "a5", name: "Storage Server", type: "Server", location: "AWS", complianceStatus: "Compliant", criticality: "Low", lastUpdated: "2023-09-30" },
 ];
 
 export default function AssetsPage() {
@@ -85,6 +84,7 @@ export default function AssetsPage() {
                       <TableHead>Asset Name</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Location</TableHead>
+                      <TableHead>Criticality</TableHead>
                       <TableHead>Compliance Status</TableHead>
                       <TableHead>Last Updated</TableHead>
                     </TableRow>
@@ -95,6 +95,19 @@ export default function AssetsPage() {
                         <TableCell className="font-medium">{asset.name}</TableCell>
                         <TableCell>{asset.type}</TableCell>
                         <TableCell>{asset.location}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            asset.criticality === "Critical" 
+                              ? "bg-red-100 text-red-800" 
+                              : asset.criticality === "High"
+                                ? "bg-orange-100 text-orange-800"
+                                : asset.criticality === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {asset.criticality}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             asset.complianceStatus === "Compliant" 
@@ -127,6 +140,7 @@ export default function AssetsPage() {
                     <TableRow>
                       <TableHead>Asset Name</TableHead>
                       <TableHead>Location</TableHead>
+                      <TableHead>Criticality</TableHead>
                       <TableHead>Compliance Status</TableHead>
                       <TableHead>Last Updated</TableHead>
                     </TableRow>
@@ -136,6 +150,19 @@ export default function AssetsPage() {
                       <TableRow key={asset.id}>
                         <TableCell className="font-medium">{asset.name}</TableCell>
                         <TableCell>{asset.location}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            asset.criticality === "Critical" 
+                              ? "bg-red-100 text-red-800" 
+                              : asset.criticality === "High"
+                                ? "bg-orange-100 text-orange-800"
+                                : asset.criticality === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {asset.criticality}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             asset.complianceStatus === "Compliant" 
@@ -168,6 +195,7 @@ export default function AssetsPage() {
                     <TableRow>
                       <TableHead>Asset Name</TableHead>
                       <TableHead>Location</TableHead>
+                      <TableHead>Criticality</TableHead>
                       <TableHead>Compliance Status</TableHead>
                       <TableHead>Last Updated</TableHead>
                     </TableRow>
@@ -177,6 +205,19 @@ export default function AssetsPage() {
                       <TableRow key={asset.id}>
                         <TableCell className="font-medium">{asset.name}</TableCell>
                         <TableCell>{asset.location}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            asset.criticality === "Critical" 
+                              ? "bg-red-100 text-red-800" 
+                              : asset.criticality === "High"
+                                ? "bg-orange-100 text-orange-800"
+                                : asset.criticality === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {asset.criticality}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             asset.complianceStatus === "Compliant" 
@@ -209,6 +250,7 @@ export default function AssetsPage() {
                     <TableRow>
                       <TableHead>Asset Name</TableHead>
                       <TableHead>Location</TableHead>
+                      <TableHead>Criticality</TableHead>
                       <TableHead>Compliance Status</TableHead>
                       <TableHead>Last Updated</TableHead>
                     </TableRow>
@@ -218,6 +260,19 @@ export default function AssetsPage() {
                       <TableRow key={asset.id}>
                         <TableCell className="font-medium">{asset.name}</TableCell>
                         <TableCell>{asset.location}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            asset.criticality === "Critical" 
+                              ? "bg-red-100 text-red-800" 
+                              : asset.criticality === "High"
+                                ? "bg-orange-100 text-orange-800"
+                                : asset.criticality === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {asset.criticality}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             asset.complianceStatus === "Compliant" 

@@ -1,11 +1,25 @@
 
-import React from "react";
+import React, { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Routes, Route } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RiskUploadForm from "@/components/risk/RiskUploadForm";
+import RiskRegister, { RiskItem } from "@/components/risk/RiskRegister";
+import { parseCSV } from "@/lib/csvUtils";
+import { useToast } from "@/hooks/use-toast";
 
 function RiskHome() {
+  const [risks, setRisks] = useState<RiskItem[]>([]);
+  const { toast } = useToast();
+
+  const handleNewRisks = (newRisks: RiskItem[]) => {
+    setRisks(prevRisks => [...prevRisks, ...newRisks]);
+    toast({
+      title: "Risks Uploaded",
+      description: `Successfully added ${newRisks.length} new risks to the register`,
+    });
+  };
+
   return (
     <div className="animate-slide-up">
       <div className="mb-6">
@@ -19,8 +33,9 @@ function RiskHome() {
       </div>
       
       <Tabs defaultValue="dashboard" className="mb-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="dashboard">Risk Dashboard</TabsTrigger>
+          <TabsTrigger value="register">Risk Register</TabsTrigger>
           <TabsTrigger value="upload">Upload Risks</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard" className="mt-6">
@@ -46,8 +61,11 @@ function RiskHome() {
             </div>
           </div>
         </TabsContent>
+        <TabsContent value="register" className="mt-6">
+          <RiskRegister risks={risks} />
+        </TabsContent>
         <TabsContent value="upload" className="mt-6">
-          <RiskUploadForm />
+          <RiskUploadForm onUploadSuccess={handleNewRisks} />
         </TabsContent>
       </Tabs>
     </div>

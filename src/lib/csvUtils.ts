@@ -1,4 +1,3 @@
-
 /**
  * Parses CSV content into an array of asset objects
  * 
@@ -56,10 +55,12 @@ export function isValidCSVFile(file: File): boolean {
  * @returns String containing sample CSV content
  */
 export function getSampleCSVTemplate(): string {
-  return `name,type,location,complianceStatus
-Web Frontend,Application,AWS,Compliant
-Data Warehouse,Database,GCP,Non-Compliant
-Authentication Server,Server,Azure,Review Needed`;
+  return `name,type,location,complianceStatus,criticality
+Web Frontend,Application,AWS,Compliant,Medium
+Data Warehouse,Database,GCP,Non-Compliant,High
+Authentication Server,Server,Azure,Review Needed,Critical
+HR Portal,Application,On-Premise,Compliant,Low
+Backup Server,Server,AWS,Compliant,High`;
 }
 
 /**
@@ -96,10 +97,10 @@ A.9.2.3,ISO 27001,Access Control Policy,Document,Accepted,John Smith,2023-11-05
  * @returns String containing sample risk CSV content
  */
 export function getSampleRiskTemplate(): string {
-  return `title,description,severity,likelihood,impact,owner,status,dueDate
-Data Breach,Unauthorized access to customer data,Critical,High,High,Security Team,Active,2023-12-15
-System Outage,Extended downtime of critical systems,High,Medium,High,IT Operations,Active,2023-11-30
-Regulatory Non-Compliance,Failure to meet compliance requirements,Medium,Low,High,Compliance Team,Mitigated,2023-10-20
-Insider Threat,Malicious actions by authorized personnel,High,Low,Critical,Security Team,Active,2024-01-15
-Ransomware Attack,Encryption of critical data with ransom demand,Critical,Medium,Critical,Incident Response Team,Active,2023-12-10`;
+  return `name,riskType,description,criticality,impact,likelihood,vulnerabilityScore,assetValue,threatValue,compensatoryControl,owner,status,dueDate
+Data Breach,External,Unauthorized access to customer data,Critical,4,2,8,4,3,Encryption and Access Controls,Security Team,Active,2023-12-15
+System Outage,Internal,Extended downtime of critical systems,High,3,2,6,3,2,Redundancy and Monitoring,IT Operations,Active,2023-11-30
+Regulatory Non-Compliance,External,Failure to meet compliance requirements,Medium,3,1,3,2,3,Regular Audits,Compliance Team,Mitigated,2023-10-20
+Insider Threat,Internal,Malicious actions by authorized personnel,High,3,1,3,4,2,Access Monitoring,Security Team,Active,2024-01-15
+Ransomware Attack,External,Encryption of critical data with ransom demand,Critical,4,2,8,4,3,Backups and Security Training,Incident Response Team,Active,2023-12-10`;
 }
