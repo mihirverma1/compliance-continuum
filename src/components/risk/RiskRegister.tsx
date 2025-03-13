@@ -8,7 +8,6 @@ export interface RiskItem {
   riskType: "Internal" | "External";
   name: string;
   description: string;
-  rating: string;
   compensatoryControl: string;
   owner: string;
   criticality: "Critical" | "High" | "Medium" | "Low";
@@ -22,15 +21,14 @@ export interface RiskItem {
   lastUpdated: string;
 }
 
-// Sample risk data
+// Sample risk data with consistent structure
 const mockRisks: RiskItem[] = [
   {
     id: "r1",
     riskType: "External",
     name: "Data Breach",
     description: "Unauthorized access to customer data",
-    rating: "High",
-    compensatoryControl: "Encryption, Access Controls",
+    compensatoryControl: "Encryption and Access Controls",
     owner: "Security Team",
     criticality: "Critical",
     impact: 4,
@@ -47,9 +45,8 @@ const mockRisks: RiskItem[] = [
     riskType: "Internal",
     name: "Insider Threat",
     description: "Malicious actions by authorized personnel",
-    rating: "Medium",
-    compensatoryControl: "Access Monitoring, Least Privilege",
-    owner: "HR & Security",
+    compensatoryControl: "Access Monitoring",
+    owner: "Security Team",
     criticality: "High",
     impact: 3,
     likelihood: 1,
@@ -64,9 +61,8 @@ const mockRisks: RiskItem[] = [
     riskType: "External",
     name: "Ransomware Attack",
     description: "Encryption of critical data with ransom demand",
-    rating: "High",
-    compensatoryControl: "Backups, Email Filtering",
-    owner: "IT Operations",
+    compensatoryControl: "Backups and Security Training",
+    owner: "Incident Response Team",
     criticality: "Critical",
     impact: 4,
     likelihood: 2,
@@ -82,7 +78,6 @@ const mockRisks: RiskItem[] = [
     riskType: "Internal",
     name: "System Misconfiguration",
     description: "Security vulnerabilities due to improper configuration",
-    rating: "Medium",
     compensatoryControl: "Configuration Management, Regular Audits",
     owner: "IT Operations",
     criticality: "Medium",
@@ -100,17 +95,16 @@ const mockRisks: RiskItem[] = [
     riskType: "External",
     name: "Regulatory Non-Compliance",
     description: "Failure to meet compliance requirements",
-    rating: "Medium",
-    compensatoryControl: "Compliance Monitoring, Regular Audits",
-    owner: "Compliance Officer",
-    criticality: "High",
+    compensatoryControl: "Regular Audits",
+    owner: "Compliance Team",
+    criticality: "Medium",
     impact: 3,
     likelihood: 1,
     vulnerabilityScore: 3,
-    assetValue: 3,
-    threatValue: 2,
-    status: "Accepted",
-    lastUpdated: "2023-09-10"
+    assetValue: 2,
+    threatValue: 3,
+    status: "Mitigated",
+    lastUpdated: "2023-10-20"
   }
 ];
 
