@@ -1,0 +1,106 @@
+
+import React from "react";
+import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+type ComplianceFramework = {
+  id: string;
+  name: string;
+  progress: number;
+  status: "compliant" | "non-compliant" | "in-progress";
+  nextAudit?: string;
+};
+
+const frameworks: ComplianceFramework[] = [
+  {
+    id: "iso27001",
+    name: "ISO 27001",
+    progress: 87,
+    status: "compliant",
+    nextAudit: "Oct 15, 2023"
+  },
+  {
+    id: "pcidss",
+    name: "PCI DSS",
+    progress: 92,
+    status: "compliant",
+    nextAudit: "Nov 30, 2023"
+  },
+  {
+    id: "hipaa",
+    name: "HIPAA",
+    progress: 65,
+    status: "in-progress",
+    nextAudit: "Feb 12, 2024"
+  },
+  {
+    id: "soc2",
+    name: "SOC 2",
+    progress: 42,
+    status: "non-compliant",
+    nextAudit: "Jan 05, 2024"
+  }
+];
+
+const StatusIcon: React.FC<{ status: ComplianceFramework["status"] }> = ({ status }) => {
+  switch (status) {
+    case "compliant":
+      return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+    case "non-compliant":
+      return <AlertCircle className="w-5 h-5 text-red-500" />;
+    case "in-progress":
+      return <Clock className="w-5 h-5 text-amber-500" />;
+    default:
+      return null;
+  }
+};
+
+export default function ComplianceStatusCard() {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border p-5 h-full">
+      <div className="flex justify-between items-center mb-5">
+        <h3 className="text-lg font-medium">Compliance Status</h3>
+        <select className="text-sm bg-secondary/50 rounded-md px-2 py-1 border-none focus:outline-none focus:ring-2 focus:ring-primary/20">
+          <option>All Frameworks</option>
+          <option>Critical Only</option>
+        </select>
+      </div>
+      
+      <div className="space-y-4">
+        {frameworks.map((framework) => (
+          <div key={framework.id} className="animate-slide-up" style={{ animationDelay: `${frameworks.indexOf(framework) * 0.1}s` }}>
+            <div className="flex justify-between items-center mb-1">
+              <div className="flex items-center gap-2">
+                <StatusIcon status={framework.status} />
+                <h4 className="font-medium">{framework.name}</h4>
+              </div>
+              <span className="text-sm font-medium">{framework.progress}%</span>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Progress 
+                value={framework.progress} 
+                className={`h-2 ${
+                  framework.status === "compliant" 
+                    ? "bg-green-100" 
+                    : framework.status === "non-compliant"
+                    ? "bg-red-100"
+                    : "bg-amber-100"
+                }`} 
+              />
+              {framework.nextAudit && (
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  Next: {framework.nextAudit}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <button className="w-full mt-4 text-sm text-primary font-medium hover:underline">
+        View detailed compliance report
+      </button>
+    </div>
+  );
+}
