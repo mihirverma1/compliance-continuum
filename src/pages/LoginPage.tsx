@@ -23,9 +23,10 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simple login check - in a real app, this would call an API
-    if (username === "miko" && password === "miko") {
-      login();
+    // Properly pass username and password to the login function
+    const success = login(username, password);
+    
+    if (success) {
       toast({
         title: "Login successful",
         description: "Welcome back!",
