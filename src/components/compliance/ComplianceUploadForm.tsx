@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Upload, FileType, Check, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +7,41 @@ import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { isValidCSVFile, parseCSV } from "@/lib/csvUtils";
+import { frameworks } from "@/components/dashboard/ComplianceStatusCard";
+
+// Sample controls per framework for the select dropdown
+const frameworkControls = {
+  iso27001: [
+    { id: "A.5.1.1", name: "Policies for information security" },
+    { id: "A.5.1.2", name: "Review of policies for information security" },
+    { id: "A.6.1.1", name: "Information security roles and responsibilities" },
+    { id: "A.9.2.3", name: "Management of privileged access rights" },
+    { id: "A.9.2.4", name: "Management of secret authentication information" },
+    { id: "A.9.2.5", name: "Review of user access rights" },
+    { id: "A.9.2.6", name: "Removal or adjustment of access rights" },
+  ],
+  pcidss: [
+    { id: "1.1", name: "Install and maintain a firewall configuration" },
+    { id: "1.2", name: "Do not use vendor-supplied defaults" },
+    { id: "3.1", name: "Keep cardholder data storage to a minimum" },
+    { id: "3.2", name: "Do not store sensitive authentication data" },
+    { id: "3.3", name: "Mask PAN when displayed" },
+  ],
+  hipaa: [
+    { id: "164.308(a)(1)(i)", name: "Security Management Process" },
+    { id: "164.308(a)(2)", name: "Assigned Security Responsibility" },
+    { id: "164.308(a)(3)(i)", name: "Workforce Security" },
+    { id: "164.310(a)(1)", name: "Facility Access Controls" },
+    { id: "164.310(b)", name: "Workstation Use" },
+  ],
+  soc2: [
+    { id: "CC1.1", name: "COSO Principle 1" },
+    { id: "CC1.2", name: "COSO Principle 2" },
+    { id: "CC2.1", name: "Communication and Information" },
+    { id: "A1.1", name: "Availability Objectives" },
+    { id: "A1.2", name: "Availability Requirements" },
+  ]
+};
 
 export default function ComplianceUploadForm() {
   const [isUploading, setIsUploading] = useState(false);
@@ -14,6 +49,14 @@ export default function ComplianceUploadForm() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [evidences, setEvidences] = useState<any[]>([]);
   const [selectedFramework, setSelectedFramework] = useState("iso27001");
+  const [selectedControl, setSelectedControl] = useState("");
+  const [availableControls, setAvailableControls] = useState(frameworkControls.iso27001);
+  
+  useEffect(() => {
+    // Update available controls when framework changes
+    setAvailableControls(frameworkControls[selectedFramework as keyof typeof frameworkControls] || []);
+    setSelectedControl(""); // Reset selected control
+  }, [selectedFramework]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -69,6 +112,10 @@ export default function ComplianceUploadForm() {
       } else {
         // For non-CSV files, we'd normally upload to a server
         // Here we'll just simulate a successful upload
+        const controlInfo = selectedControl ? 
+          availableControls.find(c => c.id === selectedControl) : 
+          { id: "A.9.2.3", name: "Management of privileged access rights" };
+          
         setEvidences([{
           id: `evidence-${Date.now()}`,
           name: file.name,
@@ -76,8 +123,9 @@ export default function ComplianceUploadForm() {
           size: `${(file.size / 1024).toFixed(2)} KB`,
           uploadDate: new Date().toISOString().split('T')[0],
           framework: selectedFramework,
-          control: "A.9.2.3",
-          status: "Accepted"
+          control: controlInfo?.id || "Unknown",
+          controlName: controlInfo?.name || "Unknown",
+          status: "Pending Review"
         }]);
       }
       
@@ -97,6 +145,20 @@ export default function ComplianceUploadForm() {
     } finally {
       setIsUploading(false);
     }
+  };
+  
+  const downloadSampleTemplate = () => {
+    const element = document.createElement("a");
+    const sampleContent = `framework,control,control_name,status,evidence_file,notes
+ISO 27001,A.5.1.1,Policies for information security,Compliant,policies-v1.2.pdf,"Complete security policies document"
+SOC 2,CC1.1,COSO Principle 1,Non-Compliant,,"Documentation pending"
+PCI DSS,1.1,Install and maintain a firewall configuration,Compliant,firewall-config.pdf,"Firewall rules documented"`;
+    const file = new Blob([sampleContent], { type: "text/csv" });
+    element.href = URL.createObjectURL(file);
+    element.download = "compliance_evidence_template.csv";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
   
   return (
@@ -128,15 +190,16 @@ export default function ComplianceUploadForm() {
                 
                 <div>
                   <label className="text-sm font-medium mb-1 block">Control ID</label>
-                  <Select defaultValue="a923">
+                  <Select value={selectedControl} onValueChange={setSelectedControl}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select control" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="a923">A.9.2.3 - Management of privileged access rights</SelectItem>
-                      <SelectItem value="a924">A.9.2.4 - Management of secret authentication information</SelectItem>
-                      <SelectItem value="a925">A.9.2.5 - Review of user access rights</SelectItem>
-                      <SelectItem value="a926">A.9.2.6 - Removal or adjustment of access rights</SelectItem>
+                      {availableControls.map((control) => (
+                        <SelectItem key={control.id} value={control.id}>
+                          {control.id} - {control.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -243,6 +306,15 @@ export default function ComplianceUploadForm() {
                         {uploadSuccess && <Check className="h-4 w-4 text-green-500" />}
                       </div>
                     )}
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={downloadSampleTemplate}
+                      className="mt-3 text-xs"
+                    >
+                      Download Sample Template
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -259,9 +331,9 @@ export default function ComplianceUploadForm() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-2 text-left font-medium">Name</th>
-                    <th className="px-4 py-2 text-left font-medium">Type</th>
-                    <th className="px-4 py-2 text-left font-medium">Control</th>
+                    <th className="px-4 py-2 text-left font-medium">File Name</th>
+                    <th className="px-4 py-2 text-left font-medium">Control ID</th>
+                    <th className="px-4 py-2 text-left font-medium">Control Name</th>
                     <th className="px-4 py-2 text-left font-medium">Status</th>
                   </tr>
                 </thead>
@@ -269,13 +341,13 @@ export default function ComplianceUploadForm() {
                   {evidences.map((evidence, index) => (
                     <tr key={evidence.id || index}>
                       <td className="px-4 py-2">{evidence.name}</td>
-                      <td className="px-4 py-2">{evidence.type || "-"}</td>
-                      <td className="px-4 py-2">{evidence.control || "A.9.2.3"}</td>
+                      <td className="px-4 py-2">{evidence.control || "N/A"}</td>
+                      <td className="px-4 py-2">{evidence.controlName || "N/A"}</td>
                       <td className="px-4 py-2">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                          ${evidence.status === "Accepted" 
+                          ${evidence.status === "Compliant" 
                             ? "bg-green-100 text-green-800" 
-                            : evidence.status === "Rejected" 
+                            : evidence.status === "Non-Compliant" 
                             ? "bg-red-100 text-red-800"
                             : "bg-amber-100 text-amber-800"}`}>
                           {evidence.status || "Pending Review"}

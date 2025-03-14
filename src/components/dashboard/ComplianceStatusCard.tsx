@@ -2,8 +2,9 @@
 import React from "react";
 import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
-type ComplianceFramework = {
+export type ComplianceFramework = {
   id: string;
   name: string;
   progress: number;
@@ -11,7 +12,7 @@ type ComplianceFramework = {
   nextAudit?: string;
 };
 
-const frameworks: ComplianceFramework[] = [
+export const frameworks: ComplianceFramework[] = [
   {
     id: "iso27001",
     name: "ISO 27001",
@@ -56,51 +57,76 @@ const StatusIcon: React.FC<{ status: ComplianceFramework["status"] }> = ({ statu
 };
 
 export default function ComplianceStatusCard() {
+  const [filter, setFilter] = React.useState("all");
+  
+  const filteredFrameworks = filter === "all" 
+    ? frameworks 
+    : frameworks.filter(f => f.status === "non-compliant");
+  
   return (
     <div className="bg-white rounded-xl shadow-sm border p-5 h-full">
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-lg font-medium">Compliance Status</h3>
-        <select className="text-sm bg-secondary/50 rounded-md px-2 py-1 border-none focus:outline-none focus:ring-2 focus:ring-primary/20">
-          <option>All Frameworks</option>
-          <option>Critical Only</option>
+        <select 
+          className="text-sm bg-secondary/50 rounded-md px-2 py-1 border-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        >
+          <option value="all">All Frameworks</option>
+          <option value="non-compliant">Critical Only</option>
         </select>
       </div>
       
       <div className="space-y-4">
-        {frameworks.map((framework) => (
-          <div key={framework.id} className="animate-slide-up" style={{ animationDelay: `${frameworks.indexOf(framework) * 0.1}s` }}>
-            <div className="flex justify-between items-center mb-1">
-              <div className="flex items-center gap-2">
-                <StatusIcon status={framework.status} />
-                <h4 className="font-medium">{framework.name}</h4>
+        {filteredFrameworks.length > 0 ? (
+          filteredFrameworks.map((framework) => (
+            <div key={framework.id} className="animate-slide-up" style={{ animationDelay: `${frameworks.indexOf(framework) * 0.1}s` }}>
+              <div className="flex justify-between items-center mb-1">
+                <div className="flex items-center gap-2">
+                  <StatusIcon status={framework.status} />
+                  <h4 className="font-medium">{framework.name}</h4>
+                  <Badge variant={
+                    framework.status === "compliant" 
+                      ? "default" 
+                      : framework.status === "non-compliant"
+                      ? "destructive"
+                      : "secondary"
+                  }>
+                    {framework.status}
+                  </Badge>
+                </div>
+                <span className="text-sm font-medium">{framework.progress}%</span>
               </div>
-              <span className="text-sm font-medium">{framework.progress}%</span>
+              
+              <div className="flex items-center gap-3">
+                <Progress 
+                  value={framework.progress} 
+                  className={`h-2 ${
+                    framework.status === "compliant" 
+                      ? "bg-green-100" 
+                      : framework.status === "non-compliant"
+                      ? "bg-red-100"
+                      : "bg-amber-100"
+                  }`} 
+                />
+                {framework.nextAudit && (
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    Next: {framework.nextAudit}
+                  </span>
+                )}
+              </div>
             </div>
-            
-            <div className="flex items-center gap-3">
-              <Progress 
-                value={framework.progress} 
-                className={`h-2 ${
-                  framework.status === "compliant" 
-                    ? "bg-green-100" 
-                    : framework.status === "non-compliant"
-                    ? "bg-red-100"
-                    : "bg-amber-100"
-                }`} 
-              />
-              {framework.nextAudit && (
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  Next: {framework.nextAudit}
-                </span>
-              )}
-            </div>
+          ))
+        ) : (
+          <div className="text-center py-6 text-muted-foreground">
+            No frameworks match the selected filter
           </div>
-        ))}
+        )}
       </div>
       
-      <button className="w-full mt-4 text-sm text-primary font-medium hover:underline">
+      <a href="/compliance" className="w-full mt-4 text-sm text-primary font-medium hover:underline block text-center">
         View detailed compliance report
-      </button>
+      </a>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import MainLayout from "@/layouts/MainLayout";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import { Check, File, FileCheck, ClipboardList, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import ComplianceUploadForm from "@/components/compliance/ComplianceUploadForm";
+import FrameworkControls from "@/components/compliance/FrameworkControls";
 
 const frameworks = [
   { 
@@ -18,11 +19,55 @@ const frameworks = [
     icon: <FileCheck className="w-5 h-5" />,
     nextAudit: "Oct 15, 2023",
     categories: [
-      { name: "Information Security Policies", completed: 8, total: 10 },
-      { name: "Organization of Information Security", completed: 12, total: 15 },
-      { name: "Access Control", completed: 18, total: 25 },
-      { name: "Cryptography", completed: 5, total: 5 },
-      { name: "Physical Security", completed: 20, total: 22 },
+      { 
+        name: "Information Security Policies", 
+        completed: 8, 
+        total: 10,
+        controls: [
+          { id: "A.5.1.1", name: "Policies for information security", status: "compliant", evidence: "policies-v1.2.pdf", lastUpdated: "2023-09-15" },
+          { id: "A.5.1.2", name: "Review of the policies for information security", status: "compliant", evidence: "policy-review.docx", lastUpdated: "2023-09-20" }
+        ]
+      },
+      { 
+        name: "Organization of Information Security", 
+        completed: 12, 
+        total: 15,
+        controls: [
+          { id: "A.6.1.1", name: "Information security roles and responsibilities", status: "compliant", evidence: "roles-responsibilities.pdf", lastUpdated: "2023-08-05" },
+          { id: "A.6.1.2", name: "Segregation of duties", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "A.6.1.3", name: "Contact with authorities", status: "compliant", evidence: "authority-contacts.xlsx", lastUpdated: "2023-07-12" }
+        ]
+      },
+      { 
+        name: "Access Control", 
+        completed: 18, 
+        total: 25,
+        controls: [
+          { id: "A.9.1.1", name: "Access control policy", status: "compliant", evidence: "access-policy.pdf", lastUpdated: "2023-08-18" },
+          { id: "A.9.1.2", name: "Access to networks and network services", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "A.9.2.1", name: "User registration and de-registration", status: "compliant", evidence: "user-management.pdf", lastUpdated: "2023-09-01" },
+          { id: "A.9.2.2", name: "User access provisioning", status: "compliant", evidence: "access-provisioning.xlsx", lastUpdated: "2023-09-05" }
+        ]
+      },
+      { 
+        name: "Cryptography", 
+        completed: 5, 
+        total: 5,
+        controls: [
+          { id: "A.10.1.1", name: "Policy on the use of cryptographic controls", status: "compliant", evidence: "crypto-policy.pdf", lastUpdated: "2023-06-20" },
+          { id: "A.10.1.2", name: "Key management", status: "compliant", evidence: "key-management.docx", lastUpdated: "2023-06-22" }
+        ]
+      },
+      { 
+        name: "Physical Security", 
+        completed: 20, 
+        total: 22,
+        controls: [
+          { id: "A.11.1.1", name: "Physical security perimeter", status: "compliant", evidence: "physical-security.pdf", lastUpdated: "2023-07-15" },
+          { id: "A.11.1.2", name: "Physical entry controls", status: "compliant", evidence: "entry-controls.jpg", lastUpdated: "2023-07-16" },
+          { id: "A.11.2.1", name: "Equipment siting and protection", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      }
     ]
   },
   { 
@@ -32,7 +77,38 @@ const frameworks = [
     controls: 78,
     compliance: 92,
     icon: <ClipboardList className="w-5 h-5" />,
-    nextAudit: "Nov 30, 2023"
+    nextAudit: "Nov 30, 2023",
+    categories: [
+      { 
+        name: "Build and Maintain a Secure Network", 
+        completed: 6, 
+        total: 6,
+        controls: [
+          { id: "1.1", name: "Install and maintain a firewall configuration", status: "compliant", evidence: "firewall-config.pdf", lastUpdated: "2023-08-12" },
+          { id: "1.2", name: "Do not use vendor-supplied defaults", status: "compliant", evidence: "default-changes.xlsx", lastUpdated: "2023-08-14" }
+        ]
+      },
+      { 
+        name: "Protect Cardholder Data", 
+        completed: 8, 
+        total: 9,
+        controls: [
+          { id: "3.1", name: "Keep cardholder data storage to a minimum", status: "compliant", evidence: "data-minimization.pdf", lastUpdated: "2023-09-02" },
+          { id: "3.2", name: "Do not store sensitive authentication data", status: "compliant", evidence: "data-storage-audit.docx", lastUpdated: "2023-09-04" },
+          { id: "3.3", name: "Mask PAN when displayed", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      },
+      { 
+        name: "Maintain a Vulnerability Management Program", 
+        completed: 5, 
+        total: 6,
+        controls: [
+          { id: "5.1", name: "Deploy anti-virus software", status: "compliant", evidence: "av-deployment.pdf", lastUpdated: "2023-07-22" },
+          { id: "5.2", name: "Ensure all anti-virus mechanisms are current", status: "compliant", evidence: "av-updates.xlsx", lastUpdated: "2023-07-25" },
+          { id: "6.1", name: "Establish a process to identify security vulnerabilities", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      }
+    ]
   },
   { 
     id: "hipaa", 
@@ -41,7 +117,39 @@ const frameworks = [
     controls: 49,
     compliance: 65,
     icon: <File className="w-5 h-5" />,
-    nextAudit: "Feb 12, 2024"
+    nextAudit: "Feb 12, 2024",
+    categories: [
+      { 
+        name: "Administrative Safeguards", 
+        completed: 8, 
+        total: 12,
+        controls: [
+          { id: "164.308(a)(1)(i)", name: "Security Management Process", status: "compliant", evidence: "security-mgmt.pdf", lastUpdated: "2023-08-05" },
+          { id: "164.308(a)(2)", name: "Assigned Security Responsibility", status: "compliant", evidence: "security-responsibility.docx", lastUpdated: "2023-08-07" },
+          { id: "164.308(a)(3)(i)", name: "Workforce Security", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      },
+      { 
+        name: "Physical Safeguards", 
+        completed: 5, 
+        total: 8,
+        controls: [
+          { id: "164.310(a)(1)", name: "Facility Access Controls", status: "compliant", evidence: "facility-access.pdf", lastUpdated: "2023-07-12" },
+          { id: "164.310(b)", name: "Workstation Use", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "164.310(c)", name: "Workstation Security", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      },
+      { 
+        name: "Technical Safeguards", 
+        completed: 7, 
+        total: 10,
+        controls: [
+          { id: "164.312(a)(1)", name: "Access Control", status: "compliant", evidence: "access-control.pdf", lastUpdated: "2023-09-10" },
+          { id: "164.312(b)", name: "Audit Controls", status: "compliant", evidence: "audit-controls.xlsx", lastUpdated: "2023-09-12" },
+          { id: "164.312(c)(1)", name: "Integrity", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      }
+    ]
   },
   { 
     id: "soc2", 
@@ -50,7 +158,39 @@ const frameworks = [
     controls: 64,
     compliance: 42,
     icon: <Check className="w-5 h-5" />,
-    nextAudit: "Jan 05, 2024"
+    nextAudit: "Jan 05, 2024",
+    categories: [
+      { 
+        name: "Security", 
+        completed: 10, 
+        total: 20,
+        controls: [
+          { id: "CC1.1", name: "COSO Principle 1", status: "compliant", evidence: "coso-p1.pdf", lastUpdated: "2023-08-15" },
+          { id: "CC1.2", name: "COSO Principle 2", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "CC2.1", name: "Communication and Information", status: "compliant", evidence: "communication.docx", lastUpdated: "2023-08-22" }
+        ]
+      },
+      { 
+        name: "Availability", 
+        completed: 6, 
+        total: 12,
+        controls: [
+          { id: "A1.1", name: "Availability Objectives", status: "compliant", evidence: "availability-objectives.pdf", lastUpdated: "2023-07-18" },
+          { id: "A1.2", name: "Availability Requirements", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "A1.3", name: "Environmental Protections", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      },
+      { 
+        name: "Processing Integrity", 
+        completed: 4, 
+        total: 10,
+        controls: [
+          { id: "PI1.1", name: "Processing Objectives", status: "compliant", evidence: "processing-objectives.pdf", lastUpdated: "2023-09-05" },
+          { id: "PI1.2", name: "Processing Procedures", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "PI1.3", name: "Processing Monitoring", status: "non-compliant", evidence: "", lastUpdated: "" }
+        ]
+      }
+    ]
   }
 ];
 
@@ -132,9 +272,16 @@ function ComplianceHome() {
 }
 
 function FrameworkDetail() {
-  // This would typically use a route parameter to get the framework ID
-  const frameworkId = "iso27001"; // For demo purposes
+  const { frameworkId } = useParams();
+  const navigate = useNavigate();
   const framework = frameworks.find(f => f.id === frameworkId) || frameworks[0];
+  
+  useEffect(() => {
+    // If framework not found, redirect to compliance home
+    if (!framework) {
+      navigate("/compliance");
+    }
+  }, [framework, navigate]);
   
   return (
     <div className="animate-slide-up">
@@ -216,22 +363,7 @@ function FrameworkDetail() {
       </div>
       
       {framework.categories && (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h3 className="text-lg font-medium mb-4">Control Categories</h3>
-          <div className="space-y-4">
-            {framework.categories.map((category, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-center mb-1">
-                  <h4 className="font-medium">{category.name}</h4>
-                  <span className="text-sm">
-                    {category.completed}/{category.total} ({Math.round(category.completed/category.total*100)}%)
-                  </span>
-                </div>
-                <Progress value={category.completed/category.total*100} className="h-2" />
-              </div>
-            ))}
-          </div>
-        </div>
+        <FrameworkControls categories={framework.categories} />
       )}
     </div>
   );
