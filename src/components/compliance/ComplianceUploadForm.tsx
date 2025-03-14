@@ -15,31 +15,67 @@ const frameworkControls = {
     { id: "A.5.1.1", name: "Policies for information security" },
     { id: "A.5.1.2", name: "Review of policies for information security" },
     { id: "A.6.1.1", name: "Information security roles and responsibilities" },
+    { id: "A.6.1.2", name: "Segregation of duties" },
+    { id: "A.6.1.3", name: "Contact with authorities" },
+    { id: "A.9.1.1", name: "Access control policy" },
+    { id: "A.9.1.2", name: "Access to networks and network services" },
+    { id: "A.9.2.1", name: "User registration and de-registration" },
+    { id: "A.9.2.2", name: "User access provisioning" },
     { id: "A.9.2.3", name: "Management of privileged access rights" },
     { id: "A.9.2.4", name: "Management of secret authentication information" },
     { id: "A.9.2.5", name: "Review of user access rights" },
     { id: "A.9.2.6", name: "Removal or adjustment of access rights" },
+    { id: "A.10.1.1", name: "Policy on the use of cryptographic controls" },
+    { id: "A.10.1.2", name: "Key management" },
+    { id: "A.11.1.1", name: "Physical security perimeter" },
+    { id: "A.11.1.2", name: "Physical entry controls" },
+    { id: "A.11.2.1", name: "Equipment siting and protection" },
   ],
   pcidss: [
     { id: "1.1", name: "Install and maintain a firewall configuration" },
     { id: "1.2", name: "Do not use vendor-supplied defaults" },
+    { id: "1.3", name: "Protect stored cardholder data" },
+    { id: "1.4", name: "Encrypt transmission of cardholder data" },
     { id: "3.1", name: "Keep cardholder data storage to a minimum" },
     { id: "3.2", name: "Do not store sensitive authentication data" },
     { id: "3.3", name: "Mask PAN when displayed" },
+    { id: "3.4", name: "Render PAN unreadable anywhere it is stored" },
+    { id: "3.5", name: "Protect cryptographic keys" },
+    { id: "3.6", name: "Document and implement key management processes" },
   ],
   hipaa: [
     { id: "164.308(a)(1)(i)", name: "Security Management Process" },
     { id: "164.308(a)(2)", name: "Assigned Security Responsibility" },
     { id: "164.308(a)(3)(i)", name: "Workforce Security" },
+    { id: "164.308(a)(4)(i)", name: "Information Access Management" },
+    { id: "164.308(a)(5)(i)", name: "Security Awareness and Training" },
     { id: "164.310(a)(1)", name: "Facility Access Controls" },
     { id: "164.310(b)", name: "Workstation Use" },
+    { id: "164.310(c)", name: "Workstation Security" },
+    { id: "164.310(d)(1)", name: "Device and Media Controls" },
+    { id: "164.312(a)(1)", name: "Access Control" },
+    { id: "164.312(b)", name: "Audit Controls" },
+    { id: "164.312(c)(1)", name: "Integrity" },
+    { id: "164.312(d)", name: "Person or Entity Authentication" },
+    { id: "164.312(e)(1)", name: "Transmission Security" },
   ],
   soc2: [
     { id: "CC1.1", name: "COSO Principle 1" },
     { id: "CC1.2", name: "COSO Principle 2" },
+    { id: "CC1.3", name: "COSO Principle 3" },
+    { id: "CC1.4", name: "COSO Principle 4" },
+    { id: "CC1.5", name: "COSO Principle 5" },
     { id: "CC2.1", name: "Communication and Information" },
+    { id: "CC2.2", name: "Board Oversight" },
+    { id: "CC2.3", name: "Risk Management" },
     { id: "A1.1", name: "Availability Objectives" },
     { id: "A1.2", name: "Availability Requirements" },
+    { id: "A1.3", name: "Environmental Protections" },
+    { id: "PI1.1", name: "Processing Objectives" },
+    { id: "PI1.2", name: "Processing Procedures" },
+    { id: "PI1.3", name: "Processing Monitoring" },
+    { id: "PI1.4", name: "Processing Outputs" },
+    { id: "PI1.5", name: "Processing Documentation" },
   ]
 };
 
@@ -194,7 +230,7 @@ PCI DSS,1.1,Install and maintain a firewall configuration,Compliant,firewall-con
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select control" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px] overflow-y-auto">
                       {availableControls.map((control) => (
                         <SelectItem key={control.id} value={control.id}>
                           {control.id} - {control.name}

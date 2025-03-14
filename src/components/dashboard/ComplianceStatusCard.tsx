@@ -3,6 +3,7 @@ import React from "react";
 import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export type ComplianceFramework = {
   id: string;
@@ -14,8 +15,8 @@ export type ComplianceFramework = {
 
 export const frameworks: ComplianceFramework[] = [
   {
-    id: "iso27001",
-    name: "ISO 27001",
+    id: "iso27001", 
+    name: "ISO 27001", 
     progress: 87,
     status: "compliant",
     nextAudit: "Oct 15, 2023"
@@ -58,10 +59,15 @@ const StatusIcon: React.FC<{ status: ComplianceFramework["status"] }> = ({ statu
 
 export default function ComplianceStatusCard() {
   const [filter, setFilter] = React.useState("all");
+  const navigate = useNavigate();
   
   const filteredFrameworks = filter === "all" 
     ? frameworks 
     : frameworks.filter(f => f.status === "non-compliant");
+  
+  const handleFrameworkClick = (frameworkId: string) => {
+    navigate(`/compliance/${frameworkId}`);
+  };
   
   return (
     <div className="bg-white rounded-xl shadow-sm border p-5 h-full">
@@ -80,7 +86,12 @@ export default function ComplianceStatusCard() {
       <div className="space-y-4">
         {filteredFrameworks.length > 0 ? (
           filteredFrameworks.map((framework) => (
-            <div key={framework.id} className="animate-slide-up" style={{ animationDelay: `${frameworks.indexOf(framework) * 0.1}s` }}>
+            <div 
+              key={framework.id} 
+              className="animate-slide-up cursor-pointer hover:bg-slate-50 rounded-md p-2 transition-colors" 
+              style={{ animationDelay: `${frameworks.indexOf(framework) * 0.1}s` }}
+              onClick={() => handleFrameworkClick(framework.id)}
+            >
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center gap-2">
                   <StatusIcon status={framework.status} />

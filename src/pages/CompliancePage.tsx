@@ -1,15 +1,38 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
-import { Check, File, FileCheck, ClipboardList, ArrowRight } from "lucide-react";
+import { Check, File, FileCheck, ClipboardList, ArrowRight, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import ComplianceUploadForm from "@/components/compliance/ComplianceUploadForm";
 import FrameworkControls from "@/components/compliance/FrameworkControls";
+import { Control } from "@/components/compliance/FrameworkControls";
 
-const frameworks = [
+export type Framework = {
+  id: string;
+  name: string;
+  description: string;
+  controls: number;
+  compliance: number;
+  icon: React.ReactNode;
+  nextAudit?: string;
+  categories: {
+    name: string;
+    completed: number;
+    total: number;
+    controls: {
+      id: string;
+      name: string;
+      status: "compliant" | "non-compliant" | "in-progress";
+      evidence?: string;
+      lastUpdated?: string;
+    }[];
+  }[];
+};
+
+const frameworks: Framework[] = [
   { 
     id: "iso27001", 
     name: "ISO 27001", 
@@ -194,7 +217,7 @@ const frameworks = [
   }
 ];
 
-function FrameworkCard({ framework }: { framework: typeof frameworks[0] }) {
+function FrameworkCard({ framework }: { framework: Framework }) {
   return (
     <Link 
       to={`/compliance/${framework.id}`}
@@ -274,14 +297,21 @@ function ComplianceHome() {
 function FrameworkDetail() {
   const { frameworkId } = useParams();
   const navigate = useNavigate();
-  const framework = frameworks.find(f => f.id === frameworkId) || frameworks[0];
+  const [framework, setFramework] = useState<Framework | undefined>(undefined);
   
   useEffect(() => {
-    // If framework not found, redirect to compliance home
-    if (!framework) {
+    const selectedFramework = frameworks.find(f => f.id === frameworkId);
+    
+    if (!selectedFramework) {
       navigate("/compliance");
+    } else {
+      setFramework(selectedFramework);
     }
-  }, [framework, navigate]);
+  }, [frameworkId, navigate]);
+  
+  if (!framework) {
+    return <div>Loading...</div>;
+  }
   
   return (
     <div className="animate-slide-up">

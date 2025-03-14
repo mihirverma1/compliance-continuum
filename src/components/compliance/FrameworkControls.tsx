@@ -2,10 +2,10 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-interface Control {
+export interface Control {
   id: string;
   name: string;
   status: "compliant" | "non-compliant" | "in-progress";
@@ -13,7 +13,7 @@ interface Control {
   lastUpdated?: string;
 }
 
-interface Category {
+export interface Category {
   name: string;
   completed: number;
   total: number;
@@ -38,7 +38,7 @@ export default function FrameworkControls({ categories }: FrameworkControlsProps
         <h3 className="text-lg font-medium mb-4">Control Categories</h3>
         <div className="space-y-4">
           {categories.map((category, index) => (
-            <div key={index} className="cursor-pointer" onClick={() => setSelectedCategory(category.name)}>
+            <div key={index} className="cursor-pointer hover:bg-slate-50 rounded-md p-2 transition-colors" onClick={() => setSelectedCategory(category.name)}>
               <div className="flex justify-between items-center mb-1">
                 <h4 className="font-medium hover:text-primary transition-colors">{category.name}</h4>
                 <span className="text-sm">
@@ -82,6 +82,8 @@ export default function FrameworkControls({ categories }: FrameworkControlsProps
                     <div className="flex items-center gap-2">
                       {control.status === "compliant" ? (
                         <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      ) : control.status === "in-progress" ? (
+                        <Clock className="h-4 w-4 text-amber-500" />
                       ) : (
                         <AlertCircle className="h-4 w-4 text-red-500" />
                       )}
