@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
-import { Check, File, FileCheck, ClipboardList, ArrowRight, AlertTriangle } from "lucide-react";
+import { Check, File, FileCheck, ClipboardList, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -24,8 +24,8 @@ const frameworks = [
         completed: 8, 
         total: 10,
         controls: [
-          { id: "A.5.1.1", name: "Policies for information security", status: "compliant" as const, evidence: "policies-v1.2.pdf", lastUpdated: "2023-09-15" },
-          { id: "A.5.1.2", name: "Review of the policies for information security", status: "compliant" as const, evidence: "policy-review.docx", lastUpdated: "2023-09-20" }
+          { id: "A.5.1.1", name: "Policies for information security", status: "compliant", evidence: "policies-v1.2.pdf", lastUpdated: "2023-09-15" },
+          { id: "A.5.1.2", name: "Review of the policies for information security", status: "compliant", evidence: "policy-review.docx", lastUpdated: "2023-09-20" }
         ]
       },
       { 
@@ -33,9 +33,9 @@ const frameworks = [
         completed: 12, 
         total: 15,
         controls: [
-          { id: "A.6.1.1", name: "Information security roles and responsibilities", status: "compliant" as const, evidence: "roles-responsibilities.pdf", lastUpdated: "2023-08-05" },
-          { id: "A.6.1.2", name: "Segregation of duties", status: "non-compliant" as const, evidence: "", lastUpdated: "" },
-          { id: "A.6.1.3", name: "Contact with authorities", status: "compliant" as const, evidence: "authority-contacts.xlsx", lastUpdated: "2023-07-12" }
+          { id: "A.6.1.1", name: "Information security roles and responsibilities", status: "compliant", evidence: "roles-responsibilities.pdf", lastUpdated: "2023-08-05" },
+          { id: "A.6.1.2", name: "Segregation of duties", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "A.6.1.3", name: "Contact with authorities", status: "compliant", evidence: "authority-contacts.xlsx", lastUpdated: "2023-07-12" }
         ]
       },
       { 
@@ -43,10 +43,10 @@ const frameworks = [
         completed: 18, 
         total: 25,
         controls: [
-          { id: "A.9.1.1", name: "Access control policy", status: "compliant" as const, evidence: "access-policy.pdf", lastUpdated: "2023-08-18" },
-          { id: "A.9.1.2", name: "Access to networks and network services", status: "non-compliant" as const, evidence: "", lastUpdated: "" },
-          { id: "A.9.2.1", name: "User registration and de-registration", status: "compliant" as const, evidence: "user-management.pdf", lastUpdated: "2023-09-01" },
-          { id: "A.9.2.2", name: "User access provisioning", status: "compliant" as const, evidence: "access-provisioning.xlsx", lastUpdated: "2023-09-05" }
+          { id: "A.9.1.1", name: "Access control policy", status: "compliant", evidence: "access-policy.pdf", lastUpdated: "2023-08-18" },
+          { id: "A.9.1.2", name: "Access to networks and network services", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "A.9.2.1", name: "User registration and de-registration", status: "compliant", evidence: "user-management.pdf", lastUpdated: "2023-09-01" },
+          { id: "A.9.2.2", name: "User access provisioning", status: "compliant", evidence: "access-provisioning.xlsx", lastUpdated: "2023-09-05" }
         ]
       },
       { 
@@ -54,8 +54,8 @@ const frameworks = [
         completed: 5, 
         total: 5,
         controls: [
-          { id: "A.10.1.1", name: "Policy on the use of cryptographic controls", status: "compliant" as const, evidence: "crypto-policy.pdf", lastUpdated: "2023-06-20" },
-          { id: "A.10.1.2", name: "Key management", status: "compliant" as const, evidence: "key-management.docx", lastUpdated: "2023-06-22" }
+          { id: "A.10.1.1", name: "Policy on the use of cryptographic controls", status: "compliant", evidence: "crypto-policy.pdf", lastUpdated: "2023-06-20" },
+          { id: "A.10.1.2", name: "Key management", status: "compliant", evidence: "key-management.docx", lastUpdated: "2023-06-22" }
         ]
       },
       { 
@@ -63,9 +63,9 @@ const frameworks = [
         completed: 20, 
         total: 22,
         controls: [
-          { id: "A.11.1.1", name: "Physical security perimeter", status: "compliant" as const, evidence: "physical-security.pdf", lastUpdated: "2023-07-15" },
-          { id: "A.11.1.2", name: "Physical entry controls", status: "compliant" as const, evidence: "entry-controls.jpg", lastUpdated: "2023-07-16" },
-          { id: "A.11.2.1", name: "Equipment siting and protection", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "A.11.1.1", name: "Physical security perimeter", status: "compliant", evidence: "physical-security.pdf", lastUpdated: "2023-07-15" },
+          { id: "A.11.1.2", name: "Physical entry controls", status: "compliant", evidence: "entry-controls.jpg", lastUpdated: "2023-07-16" },
+          { id: "A.11.2.1", name: "Equipment siting and protection", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       }
     ]
@@ -84,8 +84,8 @@ const frameworks = [
         completed: 6, 
         total: 6,
         controls: [
-          { id: "1.1", name: "Install and maintain a firewall configuration", status: "compliant" as const, evidence: "firewall-config.pdf", lastUpdated: "2023-08-12" },
-          { id: "1.2", name: "Do not use vendor-supplied defaults", status: "compliant" as const, evidence: "default-changes.xlsx", lastUpdated: "2023-08-14" }
+          { id: "1.1", name: "Install and maintain a firewall configuration", status: "compliant", evidence: "firewall-config.pdf", lastUpdated: "2023-08-12" },
+          { id: "1.2", name: "Do not use vendor-supplied defaults", status: "compliant", evidence: "default-changes.xlsx", lastUpdated: "2023-08-14" }
         ]
       },
       { 
@@ -93,9 +93,9 @@ const frameworks = [
         completed: 8, 
         total: 9,
         controls: [
-          { id: "3.1", name: "Keep cardholder data storage to a minimum", status: "compliant" as const, evidence: "data-minimization.pdf", lastUpdated: "2023-09-02" },
-          { id: "3.2", name: "Do not store sensitive authentication data", status: "compliant" as const, evidence: "data-storage-audit.docx", lastUpdated: "2023-09-04" },
-          { id: "3.3", name: "Mask PAN when displayed", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "3.1", name: "Keep cardholder data storage to a minimum", status: "compliant", evidence: "data-minimization.pdf", lastUpdated: "2023-09-02" },
+          { id: "3.2", name: "Do not store sensitive authentication data", status: "compliant", evidence: "data-storage-audit.docx", lastUpdated: "2023-09-04" },
+          { id: "3.3", name: "Mask PAN when displayed", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       },
       { 
@@ -103,9 +103,9 @@ const frameworks = [
         completed: 5, 
         total: 6,
         controls: [
-          { id: "5.1", name: "Deploy anti-virus software", status: "compliant" as const, evidence: "av-deployment.pdf", lastUpdated: "2023-07-22" },
-          { id: "5.2", name: "Ensure all anti-virus mechanisms are current", status: "compliant" as const, evidence: "av-updates.xlsx", lastUpdated: "2023-07-25" },
-          { id: "6.1", name: "Establish a process to identify security vulnerabilities", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "5.1", name: "Deploy anti-virus software", status: "compliant", evidence: "av-deployment.pdf", lastUpdated: "2023-07-22" },
+          { id: "5.2", name: "Ensure all anti-virus mechanisms are current", status: "compliant", evidence: "av-updates.xlsx", lastUpdated: "2023-07-25" },
+          { id: "6.1", name: "Establish a process to identify security vulnerabilities", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       }
     ]
@@ -124,9 +124,9 @@ const frameworks = [
         completed: 8, 
         total: 12,
         controls: [
-          { id: "164.308(a)(1)(i)", name: "Security Management Process", status: "compliant" as const, evidence: "security-mgmt.pdf", lastUpdated: "2023-08-05" },
-          { id: "164.308(a)(2)", name: "Assigned Security Responsibility", status: "compliant" as const, evidence: "security-responsibility.docx", lastUpdated: "2023-08-07" },
-          { id: "164.308(a)(3)(i)", name: "Workforce Security", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "164.308(a)(1)(i)", name: "Security Management Process", status: "compliant", evidence: "security-mgmt.pdf", lastUpdated: "2023-08-05" },
+          { id: "164.308(a)(2)", name: "Assigned Security Responsibility", status: "compliant", evidence: "security-responsibility.docx", lastUpdated: "2023-08-07" },
+          { id: "164.308(a)(3)(i)", name: "Workforce Security", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       },
       { 
@@ -134,9 +134,9 @@ const frameworks = [
         completed: 5, 
         total: 8,
         controls: [
-          { id: "164.310(a)(1)", name: "Facility Access Controls", status: "compliant" as const, evidence: "facility-access.pdf", lastUpdated: "2023-07-12" },
-          { id: "164.310(b)", name: "Workstation Use", status: "non-compliant" as const, evidence: "", lastUpdated: "" },
-          { id: "164.310(c)", name: "Workstation Security", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "164.310(a)(1)", name: "Facility Access Controls", status: "compliant", evidence: "facility-access.pdf", lastUpdated: "2023-07-12" },
+          { id: "164.310(b)", name: "Workstation Use", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "164.310(c)", name: "Workstation Security", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       },
       { 
@@ -144,9 +144,9 @@ const frameworks = [
         completed: 7, 
         total: 10,
         controls: [
-          { id: "164.312(a)(1)", name: "Access Control", status: "compliant" as const, evidence: "access-control.pdf", lastUpdated: "2023-09-10" },
-          { id: "164.312(b)", name: "Audit Controls", status: "compliant" as const, evidence: "audit-controls.xlsx", lastUpdated: "2023-09-12" },
-          { id: "164.312(c)(1)", name: "Integrity", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "164.312(a)(1)", name: "Access Control", status: "compliant", evidence: "access-control.pdf", lastUpdated: "2023-09-10" },
+          { id: "164.312(b)", name: "Audit Controls", status: "compliant", evidence: "audit-controls.xlsx", lastUpdated: "2023-09-12" },
+          { id: "164.312(c)(1)", name: "Integrity", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       }
     ]
@@ -165,9 +165,9 @@ const frameworks = [
         completed: 10, 
         total: 20,
         controls: [
-          { id: "CC1.1", name: "COSO Principle 1", status: "compliant" as const, evidence: "coso-p1.pdf", lastUpdated: "2023-08-15" },
-          { id: "CC1.2", name: "COSO Principle 2", status: "non-compliant" as const, evidence: "", lastUpdated: "" },
-          { id: "CC2.1", name: "Communication and Information", status: "compliant" as const, evidence: "communication.docx", lastUpdated: "2023-08-22" }
+          { id: "CC1.1", name: "COSO Principle 1", status: "compliant", evidence: "coso-p1.pdf", lastUpdated: "2023-08-15" },
+          { id: "CC1.2", name: "COSO Principle 2", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "CC2.1", name: "Communication and Information", status: "compliant", evidence: "communication.docx", lastUpdated: "2023-08-22" }
         ]
       },
       { 
@@ -175,9 +175,9 @@ const frameworks = [
         completed: 6, 
         total: 12,
         controls: [
-          { id: "A1.1", name: "Availability Objectives", status: "compliant" as const, evidence: "availability-objectives.pdf", lastUpdated: "2023-07-18" },
-          { id: "A1.2", name: "Availability Requirements", status: "non-compliant" as const, evidence: "", lastUpdated: "" },
-          { id: "A1.3", name: "Environmental Protections", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "A1.1", name: "Availability Objectives", status: "compliant", evidence: "availability-objectives.pdf", lastUpdated: "2023-07-18" },
+          { id: "A1.2", name: "Availability Requirements", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "A1.3", name: "Environmental Protections", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       },
       { 
@@ -185,9 +185,9 @@ const frameworks = [
         completed: 4, 
         total: 10,
         controls: [
-          { id: "PI1.1", name: "Processing Objectives", status: "compliant" as const, evidence: "processing-objectives.pdf", lastUpdated: "2023-09-05" },
-          { id: "PI1.2", name: "Processing Procedures", status: "non-compliant" as const, evidence: "", lastUpdated: "" },
-          { id: "PI1.3", name: "Processing Monitoring", status: "non-compliant" as const, evidence: "", lastUpdated: "" }
+          { id: "PI1.1", name: "Processing Objectives", status: "compliant", evidence: "processing-objectives.pdf", lastUpdated: "2023-09-05" },
+          { id: "PI1.2", name: "Processing Procedures", status: "non-compliant", evidence: "", lastUpdated: "" },
+          { id: "PI1.3", name: "Processing Monitoring", status: "non-compliant", evidence: "", lastUpdated: "" }
         ]
       }
     ]
