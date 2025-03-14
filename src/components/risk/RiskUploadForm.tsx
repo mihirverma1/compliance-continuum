@@ -54,7 +54,6 @@ export default function RiskUploadForm({ onUploadSuccess }: RiskUploadFormProps)
             riskType: item.riskType || "External",
             name: item.title || item.name || "Unnamed Risk",
             description: item.description || "",
-            rating: item.rating || "Medium",
             compensatoryControl: item.compensatoryControl || "",
             owner: item.owner || "Not Assigned",
             criticality: (item.criticality as any) || "Medium",
@@ -65,7 +64,8 @@ export default function RiskUploadForm({ onUploadSuccess }: RiskUploadFormProps)
             threatValue: Number(item.threatValue) || 2,
             status: (item.status as any) || "Active",
             dueDate: item.dueDate || "",
-            lastUpdated: item.lastUpdated || new Date().toISOString().split('T')[0]
+            lastUpdated: item.lastUpdated || new Date().toISOString().split('T')[0],
+            complianceFrameworks: item.complianceFrameworks ? item.complianceFrameworks.split(",").map((s: string) => s.trim()) : []
           }));
           
           setRisks(parsedRisks);
@@ -115,7 +115,7 @@ export default function RiskUploadForm({ onUploadSuccess }: RiskUploadFormProps)
             <h3 className="text-lg font-medium mb-2">Upload Risk Data</h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
               Upload a CSV file containing your risk register with fields like risk type, name, description, 
-              impact, likelihood, controls, and more.
+              impact, likelihood, controls, and compliance mappings.
             </p>
             
             <div className="mt-4 flex flex-col items-center gap-4">
@@ -177,6 +177,7 @@ export default function RiskUploadForm({ onUploadSuccess }: RiskUploadFormProps)
                     <th className="px-4 py-2 text-left font-medium">Impact</th>
                     <th className="px-4 py-2 text-left font-medium">Likelihood</th>
                     <th className="px-4 py-2 text-left font-medium">Status</th>
+                    <th className="px-4 py-2 text-left font-medium">Compliance</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -209,6 +210,15 @@ export default function RiskUploadForm({ onUploadSuccess }: RiskUploadFormProps)
                             : "bg-amber-100 text-amber-800"}`}>
                           {risk.status}
                         </span>
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex flex-wrap gap-1">
+                          {risk.complianceFrameworks?.map((framework, i) => (
+                            <span key={i} className="px-1 py-0.5 rounded bg-gray-100 text-xs">
+                              {framework}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                     </tr>
                   ))}

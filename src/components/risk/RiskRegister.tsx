@@ -2,6 +2,7 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export interface RiskItem {
   id: string;
@@ -19,97 +20,7 @@ export interface RiskItem {
   status: "Active" | "Mitigated" | "Accepted" | "Transferred";
   dueDate?: string;
   lastUpdated: string;
-}
-
-// Sample risk data with consistent structure
-const mockRisks: RiskItem[] = [
-  {
-    id: "r1",
-    riskType: "External",
-    name: "Data Breach",
-    description: "Unauthorized access to customer data",
-    compensatoryControl: "Encryption and Access Controls",
-    owner: "Security Team",
-    criticality: "Critical",
-    impact: 4,
-    likelihood: 2,
-    vulnerabilityScore: 8,
-    assetValue: 4,
-    threatValue: 3,
-    status: "Active",
-    dueDate: "2023-12-15",
-    lastUpdated: "2023-10-05"
-  },
-  {
-    id: "r2",
-    riskType: "Internal",
-    name: "Insider Threat",
-    description: "Malicious actions by authorized personnel",
-    compensatoryControl: "Access Monitoring",
-    owner: "Security Team",
-    criticality: "High",
-    impact: 3,
-    likelihood: 1,
-    vulnerabilityScore: 3,
-    assetValue: 3,
-    threatValue: 2,
-    status: "Mitigated",
-    lastUpdated: "2023-09-18"
-  },
-  {
-    id: "r3",
-    riskType: "External",
-    name: "Ransomware Attack",
-    description: "Encryption of critical data with ransom demand",
-    compensatoryControl: "Backups and Security Training",
-    owner: "Incident Response Team",
-    criticality: "Critical",
-    impact: 4,
-    likelihood: 2,
-    vulnerabilityScore: 8,
-    assetValue: 4,
-    threatValue: 3,
-    status: "Active",
-    dueDate: "2023-11-30",
-    lastUpdated: "2023-10-02"
-  },
-  {
-    id: "r4",
-    riskType: "Internal",
-    name: "System Misconfiguration",
-    description: "Security vulnerabilities due to improper configuration",
-    compensatoryControl: "Configuration Management, Regular Audits",
-    owner: "IT Operations",
-    criticality: "Medium",
-    impact: 2,
-    likelihood: 2,
-    vulnerabilityScore: 4,
-    assetValue: 2,
-    threatValue: 2,
-    status: "Active",
-    dueDate: "2023-11-15",
-    lastUpdated: "2023-09-25"
-  },
-  {
-    id: "r5",
-    riskType: "External",
-    name: "Regulatory Non-Compliance",
-    description: "Failure to meet compliance requirements",
-    compensatoryControl: "Regular Audits",
-    owner: "Compliance Team",
-    criticality: "Medium",
-    impact: 3,
-    likelihood: 1,
-    vulnerabilityScore: 3,
-    assetValue: 2,
-    threatValue: 3,
-    status: "Mitigated",
-    lastUpdated: "2023-10-20"
-  }
-];
-
-interface RiskRegisterProps {
-  risks?: RiskItem[];
+  complianceFrameworks?: string[]; // Add compliance frameworks
 }
 
 // Helper function to determine risk score color
@@ -143,7 +54,11 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const RiskRegister: React.FC<RiskRegisterProps> = ({ risks = mockRisks }) => {
+interface RiskRegisterProps {
+  risks: RiskItem[];
+}
+
+const RiskRegister: React.FC<RiskRegisterProps> = ({ risks }) => {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -165,6 +80,7 @@ const RiskRegister: React.FC<RiskRegisterProps> = ({ risks = mockRisks }) => {
                 <TableHead>Likelihood (0-3)</TableHead>
                 <TableHead>Risk Score</TableHead>
                 <TableHead>Controls</TableHead>
+                <TableHead>Compliance</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Due Date</TableHead>
               </TableRow>
@@ -193,6 +109,15 @@ const RiskRegister: React.FC<RiskRegisterProps> = ({ risks = mockRisks }) => {
                   <TableCell>
                     <div className="max-w-[200px] truncate" title={risk.compensatoryControl}>
                       {risk.compensatoryControl}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {risk.complianceFrameworks?.map((framework) => (
+                        <Badge key={framework} variant="outline" className="text-xs">
+                          {framework}
+                        </Badge>
+                      ))}
                     </div>
                   </TableCell>
                   <TableCell>

@@ -16,24 +16,21 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 
-interface PolicyUploadFormProps {
+interface AuditUploadFormProps {
   onSuccess?: () => void;
 }
 
-export default function PolicyUploadForm({ onSuccess }: PolicyUploadFormProps) {
+export default function AuditUploadForm({ onSuccess }: AuditUploadFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [policies, setPolicies] = useState<any[]>([]);
+  const [audits, setAudits] = useState<any[]>([]);
   
-  // Single policy upload state
-  const [policyName, setPolicyName] = useState("");
-  const [policyType, setPolicyType] = useState("Security");
-  const [policyVersion, setPolicyVersion] = useState("1.0");
-  const [policyStatus, setPolicyStatus] = useState("Draft");
-  const [policyOwner, setPolicyOwner] = useState("");
-  const [policyFile, setPolicyFile] = useState<File | null>(null);
-  const [relatedControls, setRelatedControls] = useState("");
+  // Single audit evidence upload state
+  const [framework, setFramework] = useState("ISO 27001");
+  const [control, setControl] = useState("");
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -51,10 +48,10 @@ export default function PolicyUploadForm({ onSuccess }: PolicyUploadFormProps) {
     }
   };
   
-  const handlePolicyFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEvidenceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      setPolicyFile(selectedFile);
+      setEvidenceFile(selectedFile);
     }
   };
   
@@ -70,13 +67,13 @@ export default function PolicyUploadForm({ onSuccess }: PolicyUploadFormProps) {
       reader.onload = (event) => {
         const csvText = event.target?.result as string;
         if (csvText) {
-          const parsedPolicies = parseCSV(csvText);
-          setPolicies(parsedPolicies);
+          const parsedAudits = parseCSV(csvText);
+          setAudits(parsedAudits);
           setUploadSuccess(true);
           
           toast({
             title: "Upload successful",
-            description: `${parsedPolicies.length} policies have been uploaded.`,
+            description: `${parsedAudits.length} audit records have been uploaded.`,
           });
           
           // Call onSuccess callback if provided
@@ -100,10 +97,10 @@ export default function PolicyUploadForm({ onSuccess }: PolicyUploadFormProps) {
   };
   
   const handleSingleUpload = () => {
-    if (!policyName || !policyOwner || !policyFile) {
+    if (!control || !evidenceFile) {
       toast({
         title: "Missing information",
-        description: "Please fill in all required fields and select a policy file.",
+        description: "Please fill in all required fields and select an evidence file.",
         variant: "destructive",
       });
       return;
@@ -119,18 +116,14 @@ export default function PolicyUploadForm({ onSuccess }: PolicyUploadFormProps) {
       setUploadSuccess(true);
       
       toast({
-        title: "Policy uploaded",
-        description: `${policyName} has been uploaded successfully.`,
+        title: "Evidence uploaded",
+        description: `Evidence for ${framework} control ${control} has been uploaded successfully.`,
       });
       
       // Reset form
-      setPolicyName("");
-      setPolicyType("Security");
-      setPolicyVersion("1.0");
-      setPolicyStatus("Draft");
-      setPolicyOwner("");
-      setPolicyFile(null);
-      setRelatedControls("");
+      setControl("");
+      setEvidenceFile(null);
+      setNotes("");
       
       // Call onSuccess callback if provided
       if (onSuccess) {
@@ -141,14 +134,14 @@ export default function PolicyUploadForm({ onSuccess }: PolicyUploadFormProps) {
   
   const downloadSampleTemplate = () => {
     const element = document.createElement("a");
-    // Use a specialized template for policies with versioning and control mapping
-    const sampleContent = `name,type,version,status,owner,last_updated,next_review,related_controls
-Information Security Policy,Security,2.3,Active,CISO,2023-09-15,2024-09-15,"ISO-A.5, SOC2-CC1.1, PCI-2.1"
-Access Control Policy,Security,1.8,Active,Security Team,2023-11-20,2024-11-20,"ISO-A.9, SOC2-CC6.1, PCI-7.1"
-Data Protection Policy,Compliance,3.1,Draft,Compliance Officer,2023-10-05,2024-04-05,"ISO-A.18, HIPAA-164.308"`;
+    // Use a specialized template for audit evidence
+    const sampleContent = `framework,control,control_name,status,evidence_file,notes
+ISO 27001,A.8.1.1,Inventory of Assets,Compliant,asset-inventory-2023.xlsx,"Complete asset inventory verified by IT team"
+SOC 2,CC5.2,Security Awareness Training,Non-Compliant,,"Training program under development"
+PCI DSS,3.4,Render PAN Unreadable,Compliant,encryption-report-q3.pdf,"All card data properly encrypted"`;
     const file = new Blob([sampleContent], { type: "text/csv" });
     element.href = URL.createObjectURL(file);
-    element.download = "policy_template.csv";
+    element.download = "audit_evidence_template.csv";
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -158,7 +151,7 @@ Data Protection Policy,Compliance,3.1,Draft,Compliance Officer,2023-10-05,2024-0
     <div className="space-y-6">
       <Tabs defaultValue="single" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="single">Single Policy Upload</TabsTrigger>
+          <TabsTrigger value="single">Single Evidence Upload</TabsTrigger>
           <TabsTrigger value="bulk">Bulk CSV Upload</TabsTrigger>
         </TabsList>
         
@@ -166,116 +159,73 @@ Data Protection Policy,Compliance,3.1,Draft,Compliance Officer,2023-10-05,2024-0
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="policy-name">Policy Name</Label>
-                    <Input 
-                      id="policy-name" 
-                      placeholder="e.g. Information Security Policy" 
-                      value={policyName}
-                      onChange={(e) => setPolicyName(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="policy-type">Policy Type</Label>
-                    <Select value={policyType} onValueChange={setPolicyType}>
-                      <SelectTrigger id="policy-type">
-                        <SelectValue placeholder="Select type" />
+                    <Label htmlFor="framework">Compliance Framework</Label>
+                    <Select value={framework} onValueChange={setFramework}>
+                      <SelectTrigger id="framework">
+                        <SelectValue placeholder="Select framework" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Security">Security</SelectItem>
-                        <SelectItem value="Compliance">Compliance</SelectItem>
-                        <SelectItem value="Procedure">Procedure</SelectItem>
-                        <SelectItem value="Standard">Standard</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="policy-version">Version</Label>
-                    <Input 
-                      id="policy-version" 
-                      placeholder="e.g. 1.0" 
-                      value={policyVersion}
-                      onChange={(e) => setPolicyVersion(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="policy-status">Status</Label>
-                    <Select value={policyStatus} onValueChange={setPolicyStatus}>
-                      <SelectTrigger id="policy-status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Draft">Draft</SelectItem>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Review">Under Review</SelectItem>
-                        <SelectItem value="Retired">Retired</SelectItem>
+                        <SelectItem value="ISO 27001">ISO 27001</SelectItem>
+                        <SelectItem value="SOC 2">SOC 2</SelectItem>
+                        <SelectItem value="PCI DSS">PCI DSS</SelectItem>
+                        <SelectItem value="HIPAA">HIPAA</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="policy-owner">Owner</Label>
+                    <Label htmlFor="control">Control ID</Label>
                     <Input 
-                      id="policy-owner" 
-                      placeholder="e.g. CISO" 
-                      value={policyOwner}
-                      onChange={(e) => setPolicyOwner(e.target.value)}
+                      id="control" 
+                      placeholder="e.g. A.8.1.1 or CC5.2" 
+                      value={control}
+                      onChange={(e) => setControl(e.target.value)}
                     />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="policy-file">Policy Document</Label>
+                  <Label htmlFor="evidence">Evidence File</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="file"
-                      id="policy-file"
+                      id="evidence"
                       className="hidden"
-                      accept=".pdf,.doc,.docx,.txt"
-                      onChange={handlePolicyFileChange}
+                      onChange={handleEvidenceFileChange}
                     />
                     <div className="border rounded w-full p-2 flex items-center gap-2">
                       <Label 
-                        htmlFor="policy-file"
+                        htmlFor="evidence"
                         className="cursor-pointer bg-primary/10 text-primary px-3 py-1 rounded"
                       >
                         Browse...
                       </Label>
                       <span className="text-sm text-muted-foreground">
-                        {policyFile ? policyFile.name : "No file selected"}
+                        {evidenceFile ? evidenceFile.name : "No file selected"}
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Accepted formats: PDF, Word documents, Text files
-                  </p>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="related-controls">Related Controls</Label>
-                  <Input 
-                    id="related-controls" 
-                    placeholder="e.g. ISO-A.5, SOC2-CC1.1, PCI-2.1" 
-                    value={relatedControls}
-                    onChange={(e) => setRelatedControls(e.target.value)}
+                  <Label htmlFor="notes">Notes</Label>
+                  <textarea
+                    id="notes"
+                    className="w-full p-2 border rounded min-h-[100px]"
+                    placeholder="Add any relevant notes about this evidence..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
                   />
-                  <p className="text-sm text-muted-foreground">
-                    Comma-separated list of related compliance controls
-                  </p>
                 </div>
                 
                 <div className="flex justify-end">
                   <Button 
                     onClick={handleSingleUpload} 
-                    disabled={isUploading || !policyName || !policyOwner || !policyFile}
+                    disabled={isUploading || !control || !evidenceFile}
                   >
-                    {isUploading ? "Uploading..." : "Upload Policy"}
+                    {isUploading ? "Uploading..." : "Upload Evidence"}
                   </Button>
                 </div>
               </div>
@@ -288,9 +238,9 @@ Data Protection Policy,Compliance,3.1,Draft,Compliance Officer,2023-10-05,2024-0
             <CardContent className="pt-6">
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
                 <Upload className="h-10 w-10 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium mb-2">Upload Policy Documents</h3>
+                <h3 className="text-lg font-medium mb-2">Upload Audit Evidence</h3>
                 <p className="text-sm text-muted-foreground mb-4 max-w-md">
-                  Upload a CSV file containing your policies and procedures with metadata like version, status, and linked compliance controls.
+                  Upload a CSV file containing your audit evidence records. Each row should include framework, control, status, and evidence details.
                 </p>
                 
                 <div className="mt-4 flex flex-col items-center gap-4">
@@ -299,10 +249,10 @@ Data Protection Policy,Compliance,3.1,Draft,Compliance Officer,2023-10-05,2024-0
                     accept=".csv"
                     onChange={handleFileChange}
                     className="hidden"
-                    id="policy-file-upload"
+                    id="audit-file-upload"
                   />
                   <label
-                    htmlFor="policy-file-upload"
+                    htmlFor="audit-file-upload"
                     className="cursor-pointer bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-lg transition-colors duration-200"
                   >
                     Select CSV File
@@ -338,52 +288,36 @@ Data Protection Policy,Compliance,3.1,Draft,Compliance Officer,2023-10-05,2024-0
             </CardContent>
           </Card>
           
-          {uploadSuccess && policies.length > 0 && (
+          {uploadSuccess && audits.length > 0 && (
             <Card className="mt-6 animate-slide-up">
               <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">Uploaded Policies</h3>
+                <h3 className="text-lg font-medium mb-4">Uploaded Audit Evidence</h3>
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50">
                       <tr>
-                        <th className="px-4 py-2 text-left font-medium">Name</th>
-                        <th className="px-4 py-2 text-left font-medium">Type</th>
-                        <th className="px-4 py-2 text-left font-medium">Version</th>
+                        <th className="px-4 py-2 text-left font-medium">Framework</th>
+                        <th className="px-4 py-2 text-left font-medium">Control</th>
                         <th className="px-4 py-2 text-left font-medium">Status</th>
-                        <th className="px-4 py-2 text-left font-medium">Owner</th>
-                        <th className="px-4 py-2 text-left font-medium">Last Updated</th>
-                        <th className="px-4 py-2 text-left font-medium">Related Controls</th>
+                        <th className="px-4 py-2 text-left font-medium">Evidence File</th>
+                        <th className="px-4 py-2 text-left font-medium">Notes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {policies.map((policy, index) => (
+                      {audits.map((audit, index) => (
                         <tr key={index}>
-                          <td className="px-4 py-2 font-medium">{policy.name}</td>
-                          <td className="px-4 py-2">{policy.type}</td>
-                          <td className="px-4 py-2">{policy.version}</td>
+                          <td className="px-4 py-2">{audit.framework}</td>
+                          <td className="px-4 py-2">{audit.control}</td>
                           <td className="px-4 py-2">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                              ${policy.status === "Active" 
+                              ${audit.status === "Compliant" 
                                 ? "bg-green-100 text-green-800" 
-                                : policy.status === "Draft" 
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-blue-100 text-blue-800"}`}>
-                              {policy.status || "Draft"}
+                                : "bg-red-100 text-red-800"}`}>
+                              {audit.status || "Non-Compliant"}
                             </span>
                           </td>
-                          <td className="px-4 py-2">{policy.owner}</td>
-                          <td className="px-4 py-2">{policy.last_updated}</td>
-                          <td className="px-4 py-2">
-                            {policy.related_controls && (
-                              <div className="flex flex-wrap gap-1">
-                                {policy.related_controls.split(',').map((control: string, i: number) => (
-                                  <span key={i} className="px-1.5 py-0.5 rounded bg-gray-100 text-xs">
-                                    {control.trim()}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </td>
+                          <td className="px-4 py-2">{audit.evidence_file || "—"}</td>
+                          <td className="px-4 py-2">{audit.notes || "—"}</td>
                         </tr>
                       ))}
                     </tbody>
