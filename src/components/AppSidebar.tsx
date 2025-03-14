@@ -154,16 +154,7 @@ export default function AppSidebar() {
           Risk Management
         </SidebarLink>
         
-        <SidebarLink 
-          to="/policies" 
-          icon={Shield} 
-          collapsed={collapsed}
-          subItems={[
-            { name: "Policies", to: "/policies/all" },
-            { name: "Procedures", to: "/policies/procedures" },
-            { name: "Audits", to: "/policies/audits" }
-          ]}
-        >
+        <SidebarLink to="/policies" icon={Shield} collapsed={collapsed}>
           Policies & Audits
         </SidebarLink>
         

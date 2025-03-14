@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,21 +6,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AssetUploadForm from "@/components/assets/AssetUploadForm";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Download, Filter } from "lucide-react";
+import { PlusCircle, Download, Filter, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Mock data for assets with added criticality field
+// Mock data for assets with added department field
 const mockAssets = [
-  { id: "a1", name: "Web Server", type: "Server", location: "AWS", complianceStatus: "Compliant", criticality: "High", lastUpdated: "2023-10-01" },
-  { id: "a2", name: "Customer Database", type: "Database", location: "Azure", complianceStatus: "Non-Compliant", criticality: "Critical", lastUpdated: "2023-09-15" },
-  { id: "a3", name: "Mobile App Backend", type: "Application", location: "GCP", complianceStatus: "Review Needed", criticality: "Medium", lastUpdated: "2023-10-10" },
-  { id: "a4", name: "HR System", type: "Application", location: "On-Premise", complianceStatus: "Compliant", criticality: "High", lastUpdated: "2023-08-22" },
-  { id: "a5", name: "Storage Server", type: "Server", location: "AWS", complianceStatus: "Compliant", criticality: "Low", lastUpdated: "2023-09-30" },
+  { id: "a1", name: "Web Server", type: "Server", location: "AWS", department: "UPI", complianceStatus: "Compliant", criticality: "High", lastUpdated: "2023-10-01" },
+  { id: "a2", name: "Customer Database", type: "Database", location: "Azure", department: "ATM", complianceStatus: "Non-Compliant", criticality: "Critical", lastUpdated: "2023-09-15" },
+  { id: "a3", name: "Mobile App Backend", type: "Application", location: "GCP", department: "Rupay", complianceStatus: "Review Needed", criticality: "Medium", lastUpdated: "2023-10-10" },
+  { id: "a4", name: "HR System", type: "Application", location: "On-Premise", department: "Nursing Ward", complianceStatus: "Compliant", criticality: "High", lastUpdated: "2023-08-22" },
+  { id: "a5", name: "Storage Server", type: "Server", location: "AWS", department: "UPI", complianceStatus: "Compliant", criticality: "Low", lastUpdated: "2023-09-30" },
 ];
+
+// Departments list
+const departments = ["UPI", "ATM", "Rupay", "Nursing Ward", "Network", "Security", "Operations"];
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState(mockAssets);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentAsset, setCurrentAsset] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    type: "",
+    location: "",
+    department: "",
+    complianceStatus: "",
+    criticality: ""
+  });
   const { toast } = useToast();
 
   const handleNewAssets = (newAssets) => {
@@ -30,6 +55,90 @@ export default function AssetsPage() {
       description: `Successfully added ${newAssets.length} new assets`,
     });
   };
+
+  const handleEditAsset = (asset) => {
+    setCurrentAsset(asset);
+    setEditFormData({
+      name: asset.name,
+      type: asset.type,
+      location: asset.location,
+      department: asset.department,
+      complianceStatus: asset.complianceStatus,
+      criticality: asset.criticality
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    const updatedAssets = assets.map(asset => 
+      asset.id === currentAsset.id 
+        ? { ...asset, ...editFormData, lastUpdated: new Date().toISOString().split('T')[0] } 
+        : asset
+    );
+    setAssets(updatedAssets);
+    setIsEditDialogOpen(false);
+    toast({
+      title: "Asset Updated",
+      description: `Successfully updated ${editFormData.name}`,
+    });
+  };
+
+  const renderAssetTable = (filteredAssets) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Asset Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Location</TableHead>
+          <TableHead>Department</TableHead>
+          <TableHead>Criticality</TableHead>
+          <TableHead>Compliance Status</TableHead>
+          <TableHead>Last Updated</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {filteredAssets.map((asset) => (
+          <TableRow key={asset.id}>
+            <TableCell className="font-medium">{asset.name}</TableCell>
+            <TableCell>{asset.type}</TableCell>
+            <TableCell>{asset.location}</TableCell>
+            <TableCell>{asset.department}</TableCell>
+            <TableCell>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                asset.criticality === "Critical" 
+                  ? "bg-red-100 text-red-800" 
+                  : asset.criticality === "High"
+                    ? "bg-orange-100 text-orange-800"
+                    : asset.criticality === "Medium"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-blue-100 text-blue-800"
+              }`}>
+                {asset.criticality}
+              </span>
+            </TableCell>
+            <TableCell>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                asset.complianceStatus === "Compliant" 
+                  ? "bg-green-100 text-green-800" 
+                  : asset.complianceStatus === "Non-Compliant"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-yellow-100 text-yellow-800"
+              }`}>
+                {asset.complianceStatus}
+              </span>
+            </TableCell>
+            <TableCell>{asset.lastUpdated}</TableCell>
+            <TableCell>
+              <Button variant="ghost" size="sm" onClick={() => handleEditAsset(asset)}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <MainLayout>
@@ -78,52 +187,7 @@ export default function AssetsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Asset Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Criticality</TableHead>
-                      <TableHead>Compliance Status</TableHead>
-                      <TableHead>Last Updated</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {assets.map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className="font-medium">{asset.name}</TableCell>
-                        <TableCell>{asset.type}</TableCell>
-                        <TableCell>{asset.location}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.criticality === "Critical" 
-                              ? "bg-red-100 text-red-800" 
-                              : asset.criticality === "High"
-                                ? "bg-orange-100 text-orange-800"
-                                : asset.criticality === "Medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-blue-100 text-blue-800"
-                          }`}>
-                            {asset.criticality}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.complianceStatus === "Compliant" 
-                              ? "bg-green-100 text-green-800" 
-                              : asset.complianceStatus === "Non-Compliant"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}>
-                            {asset.complianceStatus}
-                          </span>
-                        </TableCell>
-                        <TableCell>{asset.lastUpdated}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderAssetTable(assets)}
               </CardContent>
             </Card>
           </TabsContent>
@@ -135,50 +199,7 @@ export default function AssetsPage() {
                 <CardDescription>All server assets</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Asset Name</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Criticality</TableHead>
-                      <TableHead>Compliance Status</TableHead>
-                      <TableHead>Last Updated</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {assets.filter(a => a.type === "Server").map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className="font-medium">{asset.name}</TableCell>
-                        <TableCell>{asset.location}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.criticality === "Critical" 
-                              ? "bg-red-100 text-red-800" 
-                              : asset.criticality === "High"
-                                ? "bg-orange-100 text-orange-800"
-                                : asset.criticality === "Medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-blue-100 text-blue-800"
-                          }`}>
-                            {asset.criticality}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.complianceStatus === "Compliant" 
-                              ? "bg-green-100 text-green-800" 
-                              : asset.complianceStatus === "Non-Compliant"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}>
-                            {asset.complianceStatus}
-                          </span>
-                        </TableCell>
-                        <TableCell>{asset.lastUpdated}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderAssetTable(assets.filter(a => a.type === "Server"))}
               </CardContent>
             </Card>
           </TabsContent>
@@ -190,50 +211,7 @@ export default function AssetsPage() {
                 <CardDescription>All application assets</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Asset Name</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Criticality</TableHead>
-                      <TableHead>Compliance Status</TableHead>
-                      <TableHead>Last Updated</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {assets.filter(a => a.type === "Application").map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className="font-medium">{asset.name}</TableCell>
-                        <TableCell>{asset.location}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.criticality === "Critical" 
-                              ? "bg-red-100 text-red-800" 
-                              : asset.criticality === "High"
-                                ? "bg-orange-100 text-orange-800"
-                                : asset.criticality === "Medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-blue-100 text-blue-800"
-                          }`}>
-                            {asset.criticality}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.complianceStatus === "Compliant" 
-                              ? "bg-green-100 text-green-800" 
-                              : asset.complianceStatus === "Non-Compliant"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}>
-                            {asset.complianceStatus}
-                          </span>
-                        </TableCell>
-                        <TableCell>{asset.lastUpdated}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderAssetTable(assets.filter(a => a.type === "Application"))}
               </CardContent>
             </Card>
           </TabsContent>
@@ -245,50 +223,7 @@ export default function AssetsPage() {
                 <CardDescription>All database assets</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Asset Name</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Criticality</TableHead>
-                      <TableHead>Compliance Status</TableHead>
-                      <TableHead>Last Updated</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {assets.filter(a => a.type === "Database").map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className="font-medium">{asset.name}</TableCell>
-                        <TableCell>{asset.location}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.criticality === "Critical" 
-                              ? "bg-red-100 text-red-800" 
-                              : asset.criticality === "High"
-                                ? "bg-orange-100 text-orange-800"
-                                : asset.criticality === "Medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-blue-100 text-blue-800"
-                          }`}>
-                            {asset.criticality}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            asset.complianceStatus === "Compliant" 
-                              ? "bg-green-100 text-green-800" 
-                              : asset.complianceStatus === "Non-Compliant"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}>
-                            {asset.complianceStatus}
-                          </span>
-                        </TableCell>
-                        <TableCell>{asset.lastUpdated}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderAssetTable(assets.filter(a => a.type === "Database"))}
               </CardContent>
             </Card>
           </TabsContent>
@@ -299,6 +234,87 @@ export default function AssetsPage() {
           onClose={() => setIsUploadDialogOpen(false)}
           onUpload={handleNewAssets}
         />
+
+        {/* Edit Asset Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Asset</DialogTitle>
+              <DialogDescription>
+                Update asset details and compliance status
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Name</Label>
+                <Input 
+                  id="name" 
+                  value={editFormData.name} 
+                  onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="department" className="text-right">Department</Label>
+                <Select 
+                  value={editFormData.department} 
+                  onValueChange={(value) => setEditFormData({...editFormData, department: value})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map(dept => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="compliance" className="text-right">Compliance Status</Label>
+                <Select 
+                  value={editFormData.complianceStatus} 
+                  onValueChange={(value) => setEditFormData({...editFormData, complianceStatus: value})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Compliant">Compliant</SelectItem>
+                    <SelectItem value="Non-Compliant">Non-Compliant</SelectItem>
+                    <SelectItem value="Review Needed">Review Needed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="criticality" className="text-right">Criticality</Label>
+                <Select 
+                  value={editFormData.criticality} 
+                  onValueChange={(value) => setEditFormData({...editFormData, criticality: value})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select criticality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Critical">Critical</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveEdit}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );
