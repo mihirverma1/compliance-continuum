@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -349,7 +348,7 @@ export default function UsersPage() {
                         </TableCell>
                         <TableCell>
                           <Badge 
-                            variant={user.status === "active" ? "success" : "secondary"}
+                            variant={user.status === "active" ? "secondary" : "outline"}
                             className={user.status === "active" ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
                           >
                             {user.status}
