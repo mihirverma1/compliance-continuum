@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import MainLayout from "@/layouts/MainLayout";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
-import { Check, File, FileCheck, ClipboardList, Upload, SearchCode, BookOpen, Clock } from "lucide-react";
+import { Check, File, FileCheck, ClipboardList, Upload, SearchCode, BookOpen, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PolicyUploadForm from "@/components/policies/PolicyUploadForm";
