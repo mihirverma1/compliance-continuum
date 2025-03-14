@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Upload, Database, FileText } from "lucide-react";
 import { parseCSV } from "@/lib/csvUtils";
 import { useToast } from "@/hooks/use-toast";
+import { importAssets } from "@/services/assetService";
 
 interface AssetUploadFormProps {
   isOpen: boolean;
@@ -47,12 +47,28 @@ const AssetUploadForm = ({ isOpen, onClose, onUpload }: AssetUploadFormProps) =>
     setIsLoading(true);
     try {
       const text = await file.text();
-      const assets = parseCSV(text);
+      const parsedAssets = parseCSV(text);
       
-      onUpload(assets);
+      const assetsToImport = parsedAssets.map(asset => ({
+        name: asset.name,
+        type: asset.type,
+        location: asset.location,
+        department: asset.department || 'Unknown',
+        compliance_status: asset.complianceStatus,
+        criticality: asset.criticality || 'Medium'
+      }));
+      
+      await importAssets(assetsToImport);
+      
+      onUpload(parsedAssets);
       setFile(null);
+      
+      toast({
+        title: "Assets imported successfully",
+        description: `${parsedAssets.length} assets added to the database`,
+      });
     } catch (error) {
-      console.error("Error parsing CSV:", error);
+      console.error("Error processing CSV:", error);
       toast({
         title: "Error uploading file",
         description: "There was an error processing your CSV file. Please check the format and try again.",
@@ -67,18 +83,38 @@ const AssetUploadForm = ({ isOpen, onClose, onUpload }: AssetUploadFormProps) =>
     setIsLoading(true);
     const source = form.getValues("source");
     
-    // Simulate an API call to the backend
-    setTimeout(() => {
-      // Mock response with 3 sample assets
+    setTimeout(async () => {
       const mockAssets = [
-        { id: `be-${Date.now()}-1`, name: "Backend API Server", type: "Server", location: "AWS", complianceStatus: "Compliant", lastUpdated: new Date().toISOString().split('T')[0] },
-        { id: `be-${Date.now()}-2`, name: "Analytics Service", type: "Application", location: "GCP", complianceStatus: "Review Needed", lastUpdated: new Date().toISOString().split('T')[0] },
-        { id: `be-${Date.now()}-3`, name: "User Database", type: "Database", location: "Azure", complianceStatus: "Compliant", lastUpdated: new Date().toISOString().split('T')[0] },
+        { name: "Backend API Server", type: "Server", location: "AWS", department: "UPI", compliance_status: "Compliant", criticality: "High" },
+        { name: "Analytics Service", type: "Application", location: "GCP", department: "Rupay", compliance_status: "Review Needed", criticality: "Medium" },
+        { name: "User Database", type: "Database", location: "Azure", department: "ATM", compliance_status: "Compliant", criticality: "High" },
       ];
       
-      onUpload(mockAssets);
-      setIsLoading(false);
-      form.reset();
+      try {
+        await importAssets(mockAssets);
+        
+        onUpload(mockAssets.map(asset => ({
+          ...asset,
+          id: `be-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          complianceStatus: asset.compliance_status,
+          lastUpdated: new Date().toISOString().split('T')[0]
+        })));
+        
+        toast({
+          title: "Backend import successful",
+          description: `${mockAssets.length} assets imported from backend`,
+        });
+      } catch (error) {
+        console.error("Error importing from backend:", error);
+        toast({
+          title: "Import failed",
+          description: "There was an error importing assets from the backend",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+        form.reset();
+      }
     }, 1500);
   };
 
@@ -127,7 +163,7 @@ const AssetUploadForm = ({ isOpen, onClose, onUpload }: AssetUploadFormProps) =>
             
             <div className="text-xs text-gray-500">
               <p>CSV format should have these columns:</p>
-              <p><code>name,type,location,complianceStatus</code></p>
+              <p><code>name,type,location,department,complianceStatus</code></p>
             </div>
           </TabsContent>
           

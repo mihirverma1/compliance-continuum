@@ -11,13 +11,21 @@ import { Shield } from "lucide-react";
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(username, password)) {
-      navigate("/");
+    setIsLoading(true);
+    
+    try {
+      const success = await login(username, password);
+      if (success) {
+        navigate("/");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,6 +53,7 @@ export default function LoginForm() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -56,10 +65,11 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
             <p className="text-xs text-center text-muted-foreground mt-4">
               <span className="font-medium">Demo Credentials:</span> username: miko, password: miko
