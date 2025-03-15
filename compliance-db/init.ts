@@ -1,7 +1,9 @@
+
 import { initDatabase } from './db-connector';
 
 async function setup() {
   try {
+    console.log('Starting database setup...');
     await initDatabase();
     console.log('Database setup complete');
   } catch (error) {

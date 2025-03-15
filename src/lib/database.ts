@@ -10,12 +10,24 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || '5432'),
 });
 
+// Test the pool connection on startup
+pool.on('connect', () => {
+  console.log('Connected to PostgreSQL database from frontend');
+});
+
+pool.on('error', (err) => {
+  console.error('Database connection error:', err);
+});
+
 /**
  * Execute a query with optional parameters
  */
 export async function query(text: string, params?: any[]) {
   try {
+    const start = Date.now();
     const result = await pool.query(text, params);
+    const duration = Date.now() - start;
+    console.log('Frontend executed query', { duration, rows: result.rowCount });
     return result;
   } catch (error) {
     console.error('Database query error:', error);
@@ -28,132 +40,45 @@ export async function query(text: string, params?: any[]) {
  */
 export async function initDatabase() {
   try {
-    // Create users table
-    await query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL,
-        role VARCHAR(20) NOT NULL DEFAULT 'user',
-        department VARCHAR(50),
-        status VARCHAR(20) NOT NULL DEFAULT 'active',
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        last_login TIMESTAMP
-      )
-    `);
-
-    // Create assets table
-    await query(`
-      CREATE TABLE IF NOT EXISTS assets (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        type VARCHAR(50) NOT NULL,
-        location VARCHAR(100),
-        department VARCHAR(100),
-        compliance_status VARCHAR(50),
-        criticality VARCHAR(20),
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create policies table
-    await query(`
-      CREATE TABLE IF NOT EXISTS policies (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        type VARCHAR(50) NOT NULL,
-        owner VARCHAR(100),
-        status VARCHAR(50),
-        review_date DATE,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create risks table
-    await query(`
-      CREATE TABLE IF NOT EXISTS risks (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        risk_type VARCHAR(50) NOT NULL,
-        description TEXT,
-        criticality VARCHAR(20),
-        impact INTEGER,
-        likelihood INTEGER,
-        vulnerability_score INTEGER,
-        asset_value INTEGER,
-        threat_value INTEGER,
-        compensatory_control TEXT,
-        owner VARCHAR(100),
-        status VARCHAR(50),
-        due_date DATE,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create compliance_frameworks table
-    await query(`
-      CREATE TABLE IF NOT EXISTS compliance_frameworks (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        description TEXT,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create compliance_controls table
-    await query(`
-      CREATE TABLE IF NOT EXISTS compliance_controls (
-        id SERIAL PRIMARY KEY,
-        framework_id INTEGER REFERENCES compliance_frameworks(id),
-        control_id VARCHAR(20) NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        description TEXT,
-        category VARCHAR(100),
-        status VARCHAR(50) DEFAULT 'Not Assessed',
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        last_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create audit_evidence table
-    await query(`
-      CREATE TABLE IF NOT EXISTS audit_evidence (
-        id SERIAL PRIMARY KEY,
-        control_id INTEGER REFERENCES compliance_controls(id),
-        evidence_name VARCHAR(100) NOT NULL,
-        evidence_type VARCHAR(50),
-        file_path VARCHAR(255),
-        status VARCHAR(50),
-        reviewer VARCHAR(100),
-        review_date DATE,
-        notes TEXT,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create some default data (admin user)
-    const adminExists = await query('SELECT * FROM users WHERE username = $1', ['miko']);
-    if (adminExists.rowCount === 0) {
-      // In a real app, you'd use bcrypt for password hashing
-      await query(
-        'INSERT INTO users (username, password_hash, name, email, role) VALUES ($1, $2, $3, $4, $5)',
-        ['miko', 'miko', 'Miko Admin', 'admin@example.com', 'admin']
-      );
-    }
-
-    console.log('Database initialized successfully');
+    console.log('Checking database connection from frontend...');
+    
+    // Simple connection test
+    const result = await query('SELECT NOW() as current_time');
+    console.log('Database connection successful:', result.rows[0].current_time);
+    
+    // We'll run a check on users table to ensure we have access
+    const usersCheck = await query('SELECT COUNT(*) FROM users');
+    console.log(`Found ${usersCheck.rows[0].count} users in the database`);
+    
+    return true;
   } catch (error) {
-    console.error('Database initialization error:', error);
+    console.error('Database initialization error from frontend:', error);
     throw error;
+  }
+}
+
+/**
+ * Utility function to check if a table exists
+ */
+export async function tableExists(tableName: string): Promise<boolean> {
+  try {
+    const result = await query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = $1
+      )
+    `, [tableName]);
+    
+    return result.rows[0].exists;
+  } catch (error) {
+    console.error(`Error checking if table ${tableName} exists:`, error);
+    return false;
   }
 }
 
 export default {
   query,
   initDatabase,
+  tableExists
 };

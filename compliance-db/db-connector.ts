@@ -1,3 +1,4 @@
+
 import { Pool } from 'pg';
 import * as dotenv from 'dotenv';
 
@@ -6,11 +7,21 @@ dotenv.config();
 
 // Database connection pool configuration
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',              // Default user: postgres
-  host: process.env.DB_HOST || 'localhost',             // Default host: localhost
-  database: process.env.DB_NAME || 'compliance_continuum', // Default database name
-  password: process.env.DB_PASSWORD || 'password',      // Default password (update this!)
-  port: parseInt(process.env.DB_PORT || '5432'),        // Default port: 5432
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'compliance_continuum',
+  password: process.env.DB_PASSWORD || 'password',
+  port: parseInt(process.env.DB_PORT || '5432'),
+});
+
+// Test the connection
+pool.on('connect', () => {
+  console.log('Connected to PostgreSQL database');
+});
+
+pool.on('error', (err) => {
+  console.error('PostgreSQL pool error:', err);
+  process.exit(1);
 });
 
 /**
@@ -21,7 +32,10 @@ const pool = new Pool({
  */
 export async function query(text: string, params?: any[]) {
   try {
+    const start = Date.now();
     const result = await pool.query(text, params);
+    const duration = Date.now() - start;
+    console.log('Executed query', { text, duration, rows: result.rowCount });
     return result;
   } catch (error) {
     console.error('Database query error:', error);
@@ -34,6 +48,8 @@ export async function query(text: string, params?: any[]) {
  */
 export async function initDatabase() {
   try {
+    console.log('Initializing database...');
+    
     // Create users table
     await query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -150,6 +166,7 @@ export async function initDatabase() {
         'INSERT INTO users (username, password_hash, name, email, role) VALUES ($1, $2, $3, $4, $5)',
         ['miko', 'miko', 'Miko Admin', 'admin@example.com', 'admin']
       );
+      console.log('Default admin user created');
     }
 
     console.log('Database initialized successfully');
