@@ -1,33 +1,79 @@
 
 import { Pool } from 'pg';
 
-// Database connection pool
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'compliance_continuum',
-  password: process.env.DB_PASSWORD || 'postgres',
-  port: parseInt(process.env.DB_PORT || '5432'),
-});
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
 
-// Test the pool connection on startup
-pool.on('connect', () => {
-  console.log('Connected to PostgreSQL database from frontend');
-});
+// Database connection pool - will only be initialized in Node.js environments
+let pool: Pool | null = null;
 
-pool.on('error', (err) => {
-  console.error('Database connection error:', err);
-});
+if (!isBrowser) {
+  // Only create the pool in a Node.js environment
+  pool = new Pool({
+    user: process.env.DB_USER || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'compliance_continuum',
+    password: process.env.DB_PASSWORD || 'postgres',
+    port: parseInt(process.env.DB_PORT || '5432'),
+  });
+
+  // Test the pool connection on startup
+  pool.on('connect', () => {
+    console.log('Connected to PostgreSQL database');
+  });
+
+  pool.on('error', (err) => {
+    console.error('Database connection error:', err);
+  });
+}
+
+// Mock data for browser environment
+const mockData = {
+  users: [
+    { id: 1, name: 'Admin User', email: 'admin@example.com', role: 'admin' },
+    { id: 2, name: 'Regular User', email: 'user@example.com', role: 'user' },
+  ],
+  assets: [],
+  policies: [],
+  risks: [],
+  compliance_frameworks: [],
+  compliance_controls: [],
+  audit_evidence: [],
+};
 
 /**
  * Execute a query with optional parameters
  */
 export async function query(text: string, params?: any[]) {
   try {
+    if (isBrowser) {
+      console.log('Browser environment detected, using mock data');
+      
+      // Simulate a delay to mimic a real database query
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Very simple mock implementation
+      if (text.includes('SELECT * FROM users')) {
+        return { rows: mockData.users, rowCount: mockData.users.length };
+      }
+      
+      if (text.includes('SELECT COUNT(*) FROM')) {
+        const tableName = text.match(/FROM\s+(\w+)/i)?.[1] || '';
+        const count = mockData[tableName as keyof typeof mockData]?.length || 0;
+        return { rows: [{ count }], rowCount: 1 };
+      }
+      
+      return { rows: [], rowCount: 0 };
+    }
+    
+    if (!pool) {
+      throw new Error('Database pool not initialized - not in Node.js environment');
+    }
+    
     const start = Date.now();
     const result = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('Frontend executed query', { duration, rows: result.rowCount });
+    console.log('Executed query', { duration, rows: result.rowCount });
     return result;
   } catch (error) {
     console.error('Database query error:', error);
@@ -40,7 +86,16 @@ export async function query(text: string, params?: any[]) {
  */
 export async function initDatabase() {
   try {
-    console.log('Checking database connection from frontend...');
+    console.log('Checking database connection...');
+    
+    if (isBrowser) {
+      console.log('Browser environment detected, using mock data');
+      return true;
+    }
+    
+    if (!pool) {
+      throw new Error('Database pool not initialized - not in Node.js environment');
+    }
     
     // Simple connection test
     const result = await query('SELECT NOW() as current_time');
@@ -52,8 +107,8 @@ export async function initDatabase() {
     
     return true;
   } catch (error) {
-    console.error('Database initialization error from frontend:', error);
-    throw error;
+    console.error('Database initialization error:', error);
+    return false;
   }
 }
 
@@ -62,6 +117,15 @@ export async function initDatabase() {
  */
 export async function tableExists(tableName: string): Promise<boolean> {
   try {
+    if (isBrowser) {
+      // In browser, pretend all required tables exist
+      return true;
+    }
+    
+    if (!pool) {
+      throw new Error('Database pool not initialized - not in Node.js environment');
+    }
+    
     const result = await query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
