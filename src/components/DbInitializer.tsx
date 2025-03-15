@@ -5,7 +5,6 @@ import { toast } from '@/components/ui/use-toast';
 
 export default function DbInitializer({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [status, setStatus] = useState<string>('connecting');
   const isBrowser = typeof window !== 'undefined';
 
@@ -13,7 +12,7 @@ export default function DbInitializer({ children }: { children: React.ReactNode 
     const initialize = async () => {
       try {
         // Try to initialize the database connection
-        const result = await initDatabase();
+        await initDatabase();
         
         if (isBrowser) {
           console.log('Using browser-compatible mock database');
@@ -60,7 +59,6 @@ export default function DbInitializer({ children }: { children: React.ReactNode 
         setStatus('connected');
       } catch (error) {
         console.error('Database initialization error:', error);
-        setIsError(true);
         setStatus('failed');
         
         toast({
