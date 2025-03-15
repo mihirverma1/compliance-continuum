@@ -21,8 +21,8 @@ export default function DbInitializer({ children }: { children: React.ReactNode 
           setStatus('mock-connected');
           
           toast({
-            title: 'Using Local Data',
-            description: 'Currently using local data for preview. Database connections work in deployment.',
+            title: 'Using Preview Data',
+            description: 'Currently using mock data for preview. Database connections work in deployment.',
             duration: 4000,
           });
           
@@ -69,17 +69,14 @@ export default function DbInitializer({ children }: { children: React.ReactNode 
           variant: 'destructive',
           duration: 5000,
         });
+        
+        // Even though there was an error, we'll still render the app with mock data
+        setIsInitialized(true);
       }
     };
 
     initialize();
   }, []);
-
-  if (isError) {
-    // In case of DB error, we still render the app but it will fall back to local storage
-    console.log('Using local storage fallback due to database connection error');
-    return <>{children}</>;
-  }
 
   if (!isInitialized) {
     // Show a loading screen while connecting to the database
